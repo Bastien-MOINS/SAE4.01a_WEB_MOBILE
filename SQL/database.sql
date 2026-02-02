@@ -5,6 +5,8 @@ CREATE OR REPLACE TABLE VOL (
     date_arrivee DATE,
     heure_arrivee TIME(6),
     id_compagnie INT(8),
+    numero_aeroport_dep INT(8),
+    numero_aeroport_arr INT(8),
     PRIMARY KEY(numero_vol, date_debut, heure_debut)
 );
 
@@ -32,5 +34,7 @@ CREATE OR REPLACE TABLE TERMINAL (
 );
 
 ALTER TABLE VOL ADD FOREIGN KEY (id_compagnie) REFERENCES COMPAGNIE (id_compagnie);
-ALTER TABLE TERMINAL ADD FOREIGN KEY (numero_vol, date_debut, heure_depart) REFERENCES VOL (numero_vol, date_debut, date_arrivee);
+ALTER TABLE TERMINAL ADD FOREIGN KEY (numero_vol, date_debut, heure_debut) REFERENCES VOL (numero_vol, date_debut, heure_debut);
 ALTER TABLE TERMINAL ADD FOREIGN KEY (numero_aeroport) REFERENCES AEROPORT (numero_aeroport);
+ALTER TABLE VOL ADD FOREIGN KEY (numero_aeroport_dep) REFERENCES AEROPORT (numero_aeroport);
+ALTER TABLE VOL ADD FOREIGN KEY (numero_aeroport_arr) REFERENCES AEROPORT (numero_aeroport);
