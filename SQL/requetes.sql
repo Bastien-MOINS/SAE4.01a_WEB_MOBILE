@@ -1,7 +1,8 @@
--- Requetes A
+-- Requete A
 
-select ville from VOL as V from AEROPORT as A1, AEROPORT as A2
-where V.num_vol_dep = A1.numero_aeroport and V.num_vol_arr = A2.numero_aeroport
-and a1.ville = "Paris"; 
+select distinct A2.ville from VOL as V 
+join AEROPORT as A1 on V.numero_aeroport_dep = A1.numero_aeroport
+join AEROPORT as A2 on V.numero_aeroport_arr = A2.numero_aeroport
+where A1.ville = "Paris";
 
--- Requetes C
+-- Requete C
