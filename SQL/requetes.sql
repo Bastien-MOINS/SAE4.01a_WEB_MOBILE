@@ -15,6 +15,40 @@ begin
 end |
 delimiter ;
 
+-- Requete B
+
+SELECT DISTINCT Aeroport_Final.ville 
+-- premier vol depart->correspondance
+FROM VOL AS V1
+JOIN AEROPORT AS Aeroport_Depart ON V1.numero_aeroport_dep = Aeroport_Depart.numero_aeroport
+-- deuxieme vol correspondance->arrivee
+JOIN VOL AS V2 ON V1.numero_aeroport_arr = V2.numero_aeroport_dep
+JOIN AEROPORT AS Aeroport_Final ON V2.numero_aeroport_arr = Aeroport_Final.numero_aeroport
+WHERE Aeroport_Depart.ville = 'Paris' 
+AND (V2.date_debut > V1.date_arrivee OR (V2.date_debut = V1.date_arrivee AND V2.heure_debut > V1.heure_arrivee))
+AND (V2.date_debut < DATE_ADD(V1.date_arrivee, INTERVAL 1 DAY) OR (V2.date_debut = DATE_ADD(V1.date_arrivee, INTERVAL 1 DAY) 
+AND V2.heure_debut <= V1.heure_arrivee));
+
+-- Requete C
+
+SELECT DISTINCT Aeroport_Final.ville 
+-- premier vol depart->correspondance
+FROM VOL AS V1
+JOIN AEROPORT AS Aeroport_Depart ON V1.numero_aeroport_dep = Aeroport_Depart.numero_aeroport
+-- deuxieme vol correspondance1->correspondance2
+JOIN VOL AS V2 ON V1.numero_aeroport_arr = V2.numero_aeroport_dep
+-- troisieme vol correspondance2->arrivee
+JOIN VOL AS V3 ON V2.numero_aeroport_arr = V3.numero_aeroport_dep
+JOIN AEROPORT AS Aeroport_Final ON V3.numero_aeroport_arr = Aeroport_Final.numero_aeroport
+WHERE Aeroport_Depart.ville = 'Paris' 
+AND (V2.date_debut > V1.date_arrivee OR (V2.date_debut = V1.date_arrivee AND V2.heure_debut > V1.heure_arrivee))
+AND (V2.date_debut < DATE_ADD(V1.date_arrivee, INTERVAL 1 DAY) OR (V2.date_debut = DATE_ADD(V1.date_arrivee, INTERVAL 1 DAY) 
+AND V2.heure_debut <= V1.heure_arrivee))
+AND (V3.date_debut > V2.date_arrivee OR (V3.date_debut = V2.date_arrivee AND V3.heure_debut > V2.heure_arrivee))
+AND (V3.date_debut < DATE_ADD(V2.date_arrivee, INTERVAL 1 DAY) OR (V3.date_debut = DATE_ADD(V2.date_arrivee, INTERVAL 1 DAY) 
+AND V3.heure_debut <= V2.heure_arrivee));
+
+
 -- Requete D
 
 with recursive villes_accessibles() as (

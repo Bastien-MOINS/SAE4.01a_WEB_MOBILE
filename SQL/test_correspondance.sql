@@ -71,3 +71,44 @@ INSERT INTO VOL (numero_vol, date_debut, heure_debut, date_arrivee, heure_arrive
 (1006, '2026-07-01', '09:00:00', '2026-07-01', '10:30:00', 1, 200, 206);
 
 -- >>> RÉSULTAT ATTENDU : BERLIN (206) ne doit pas apparaitre.
+
+
+-- ----------------------------------------------------------
+-- CAS 5 : Autre trajet Valide avec 1 correspondance (DOIT APPARAITRE - Requete B)
+-- Trajet : Paris (CDG 101) -> Londres (104) -> Dubai (105)
+-- ----------------------------------------------------------
+-- Vol 1 : Départ Paris 10:00, Arrivée Londres 11:00
+INSERT INTO VOL (numero_vol, date_debut, heure_debut, date_arrivee, heure_arrivee, id_compagnie, numero_aeroport_dep, numero_aeroport_arr) VALUES 
+(1007, '2026-07-01', '10:00:00', '2026-07-01', '11:00:00', 1, 101, 104);
+
+-- Vol 2 : Départ Londres 14:00, Arrivée Dubai 23:00
+INSERT INTO VOL (numero_vol, date_debut, heure_debut, date_arrivee, heure_arrivee, id_compagnie, numero_aeroport_dep, numero_aeroport_arr) VALUES 
+(1008, '2026-07-01', '14:00:00', '2026-07-01', '23:00:00', 4, 104, 105);
+
+-- >>> RÉSULTAT ATTENDU Requete B : DUBAI (105) doit apparaitre.
+
+
+-- ----------------------------------------------------------
+-- CAS 6 : Trajet Valide avec 2 correspondances (DOIT APPARAITRE - Requete C)
+-- Trajet : Paris (CDG 101) -> Munich (200) -> Madrid (201) -> Lisbonne (204)
+-- ----------------------------------------------------------
+-- Note: Les vols Paris->Munich (1001) et Munich->Madrid (1002) existent déjà (Arrivée Madrid 13:30).
+
+-- Vol 3 : Départ Madrid 16:00, Arrivée Lisbonne 17:15
+INSERT INTO VOL (numero_vol, date_debut, heure_debut, date_arrivee, heure_arrivee, id_compagnie, numero_aeroport_dep, numero_aeroport_arr) VALUES 
+(1009, '2026-07-01', '16:00:00', '2026-07-01', '17:15:00', 1, 201, 204);
+
+-- >>> RÉSULTAT ATTENDU Requete C : LISBONNE (204) doit apparaitre.
+
+
+-- ----------------------------------------------------------
+-- CAS 7 : Autre trajet Valide avec 2 correspondances (DOIT APPARAITRE - Requete C)
+-- Trajet : Paris (CDG 101) -> Londres (104) -> Dubai (105) -> Berlin (206)
+-- ----------------------------------------------------------
+-- Note: Les vols Paris->Londres (1007) et Londres->Dubai (1008) existent déjà (Arrivée Dubai 23:00).
+
+-- Vol 3 : Départ Dubai 02:00 (le lendemain), Arrivée Berlin 06:00
+INSERT INTO VOL (numero_vol, date_debut, heure_debut, date_arrivee, heure_arrivee, id_compagnie, numero_aeroport_dep, numero_aeroport_arr) VALUES 
+(1010, '2026-07-02', '02:00:00', '2026-07-02', '06:00:00', 5, 105, 206);
+
+-- >>> RÉSULTAT ATTENDU Requete C : BERLIN (206) doit apparaitre.
