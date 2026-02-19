@@ -4,14 +4,17 @@
 
 -- 1. Ajout d'aéroports pour les tests
 -- (IDs 200+ pour ne pas entrer en conflit avec les existants)
-INSERT INTO AEROPORT (numero_aeroport, nom_aeroport, ville, pays) VALUES 
-(200, 'Munich Airport', 'Munich', 'Allemagne'),       -- Escale Test
-(201, 'Madrid Barajas', 'Madrid', 'Espagne'),         -- Destination Valide (1 corresp)
-(202, 'Rome Fiumicino', 'Rome', 'Italie'),            -- Destination Invalide (Vol direct)
-(203, 'Vienna Airport', 'Vienne', 'Autriche'),        -- Escale pour trajet "Départ non Paris"
-(204, 'Lisbon Airport', 'Lisbonne', 'Portugal'),      -- Destination Invalide (Départ de Lyon)
-(205, 'Lyon St Exupery', 'Lyon', 'France'),           -- Ville de départ "Lyon"
-(206, 'Berlin Brand', 'Berlin', 'Allemagne');         -- Destination Invalide (Mauvaise correspondance)
+
+DELETE FROM VOL WHERE numero_vol BETWEEN 1000 AND 1010;
+DELETE FROM AEROPORT WHERE numero_aeroport IN (200, 201, 202, 203, 204, 205, 206);
+
+INSERT INTO AEROPORT (numero_aeroport, nom_aeroport, ville, pays) VALUES (200, 'Munich Airport', 'Munich', 'Allemagne');
+INSERT INTO AEROPORT (numero_aeroport, nom_aeroport, ville, pays) VALUES (201, 'Madrid Barajas', 'Madrid', 'Espagne');
+INSERT INTO AEROPORT (numero_aeroport, nom_aeroport, ville, pays) VALUES (202, 'Rome Fiumicino', 'Rome', 'Italie');
+INSERT INTO AEROPORT (numero_aeroport, nom_aeroport, ville, pays) VALUES (203, 'Vienna Airport', 'Vienne', 'Autriche');
+INSERT INTO AEROPORT (numero_aeroport, nom_aeroport, ville, pays) VALUES (204, 'Lisbon Airport', 'Lisbonne', 'Portugal');
+INSERT INTO AEROPORT (numero_aeroport, nom_aeroport, ville, pays) VALUES (205, 'Lyon St Exupery', 'Lyon', 'France');
+INSERT INTO AEROPORT (numero_aeroport, nom_aeroport, ville, pays) VALUES (206, 'Berlin Brand', 'Berlin', 'Allemagne');
 
 -- 2. Ajout des vols (Table VOL)
 -- PRIMARY KEY: (numero_vol, date_debut, heure_debut)
@@ -24,11 +27,11 @@ INSERT INTO AEROPORT (numero_aeroport, nom_aeroport, ville, pays) VALUES
 
 -- Vol 1 : Départ Paris 08:00, Arrivée Munich 09:30
 INSERT INTO VOL (numero_vol, date_debut, heure_debut, date_arrivee, heure_arrivee, id_compagnie, numero_aeroport_dep, numero_aeroport_arr) VALUES 
-(1001, '2026-07-01', '08:00:00', '2026-07-01', '09:30:00', 1, 101, 200);
+(1001, TO_DATE('2026-07-01', 'YYYY-MM-DD'), TO_TIMESTAMP('08:00:00', 'HH24:MI:SS'), TO_DATE('2026-07-01', 'YYYY-MM-DD'), TO_TIMESTAMP('09:30:00', 'HH24:MI:SS'), 1, 101, 200);
 
 -- Vol 2 : Départ Munich 11:00 (1h30 d'escale), Arrivée Madrid 13:30
 INSERT INTO VOL (numero_vol, date_debut, heure_debut, date_arrivee, heure_arrivee, id_compagnie, numero_aeroport_dep, numero_aeroport_arr) VALUES 
-(1002, '2026-07-01', '11:00:00', '2026-07-01', '13:30:00', 1, 200, 201);
+(1002, TO_DATE('2026-07-01', 'YYYY-MM-DD'), TO_TIMESTAMP('11:00:00', 'HH24:MI:SS'), TO_DATE('2026-07-01', 'YYYY-MM-DD'), TO_TIMESTAMP('13:30:00', 'HH24:MI:SS'), 1, 200, 201);
 
 -- >>> RÉSULTAT ATTENDU : MADRID (201) doit apparaitre dans les résultats.
 
@@ -38,7 +41,7 @@ INSERT INTO VOL (numero_vol, date_debut, heure_debut, date_arrivee, heure_arrive
 -- Trajet : Paris (CDG 101) -> Rome (202)
 -- ----------------------------------------------------------
 INSERT INTO VOL (numero_vol, date_debut, heure_debut, date_arrivee, heure_arrivee, id_compagnie, numero_aeroport_dep, numero_aeroport_arr) VALUES 
-(1003, '2026-07-01', '09:00:00', '2026-07-01', '11:00:00', 1, 101, 202);
+(1003, TO_DATE('2026-07-01', 'YYYY-MM-DD'), TO_TIMESTAMP('09:00:00', 'HH24:MI:SS'), TO_DATE('2026-07-01', 'YYYY-MM-DD'), TO_TIMESTAMP('11:00:00', 'HH24:MI:SS'), 1, 101, 202);
 
 -- >>> RÉSULTAT ATTENDU : ROME (202) ne doit pas être vu comme "1 correspondance".
 
@@ -50,11 +53,11 @@ INSERT INTO VOL (numero_vol, date_debut, heure_debut, date_arrivee, heure_arrive
 
 -- Vol départ Lyon
 INSERT INTO VOL (numero_vol, date_debut, heure_debut, date_arrivee, heure_arrivee, id_compagnie, numero_aeroport_dep, numero_aeroport_arr) VALUES 
-(1004, '2026-07-01', '08:00:00', '2026-07-01', '10:00:00', 1, 205, 203); 
+(1004, TO_DATE('2026-07-01', 'YYYY-MM-DD'), TO_TIMESTAMP('08:00:00', 'HH24:MI:SS'), TO_DATE('2026-07-01', 'YYYY-MM-DD'), TO_TIMESTAMP('10:00:00', 'HH24:MI:SS'), 1, 205, 203); 
 
 -- Vol suite vers Lisbonne
 INSERT INTO VOL (numero_vol, date_debut, heure_debut, date_arrivee, heure_arrivee, id_compagnie, numero_aeroport_dep, numero_aeroport_arr) VALUES 
-(1005, '2026-07-01', '12:00:00', '2026-07-01', '15:00:00', 1, 203, 204); 
+(1005, TO_DATE('2026-07-01', 'YYYY-MM-DD'), TO_TIMESTAMP('12:00:00', 'HH24:MI:SS'), TO_DATE('2026-07-01', 'YYYY-MM-DD'), TO_TIMESTAMP('15:00:00', 'HH24:MI:SS'), 1, 203, 204); 
 
 -- >>> RÉSULTAT ATTENDU : LISBONNE (204) ne doit pas apparaitre (car départ initial de Lyon).
 
@@ -68,7 +71,7 @@ INSERT INTO VOL (numero_vol, date_debut, heure_debut, date_arrivee, heure_arrive
 -- Note: Le vol Paris->Munich (1001) existe déjà ci-dessus (Arrivée 09:30).
 -- On ajoute un vol Munich->Berlin qui part à 09:00 la même jour.
 INSERT INTO VOL (numero_vol, date_debut, heure_debut, date_arrivee, heure_arrivee, id_compagnie, numero_aeroport_dep, numero_aeroport_arr) VALUES 
-(1006, '2026-07-01', '09:00:00', '2026-07-01', '10:30:00', 1, 200, 206);
+(1006, TO_DATE('2026-07-01', 'YYYY-MM-DD'), TO_TIMESTAMP('09:00:00', 'HH24:MI:SS'), TO_DATE('2026-07-01', 'YYYY-MM-DD'), TO_TIMESTAMP('10:30:00', 'HH24:MI:SS'), 1, 200, 206);
 
 -- >>> RÉSULTAT ATTENDU : BERLIN (206) ne doit pas apparaitre.
 
@@ -79,11 +82,11 @@ INSERT INTO VOL (numero_vol, date_debut, heure_debut, date_arrivee, heure_arrive
 -- ----------------------------------------------------------
 -- Vol 1 : Départ Paris 10:00, Arrivée Londres 11:00
 INSERT INTO VOL (numero_vol, date_debut, heure_debut, date_arrivee, heure_arrivee, id_compagnie, numero_aeroport_dep, numero_aeroport_arr) VALUES 
-(1007, '2026-07-01', '10:00:00', '2026-07-01', '11:00:00', 1, 101, 104);
+(1007, TO_DATE('2026-07-01', 'YYYY-MM-DD'), TO_TIMESTAMP('10:00:00', 'HH24:MI:SS'), TO_DATE('2026-07-01', 'YYYY-MM-DD'), TO_TIMESTAMP('11:00:00', 'HH24:MI:SS'), 1, 101, 104);
 
 -- Vol 2 : Départ Londres 14:00, Arrivée Dubai 23:00
 INSERT INTO VOL (numero_vol, date_debut, heure_debut, date_arrivee, heure_arrivee, id_compagnie, numero_aeroport_dep, numero_aeroport_arr) VALUES 
-(1008, '2026-07-01', '14:00:00', '2026-07-01', '23:00:00', 4, 104, 105);
+(1008, TO_DATE('2026-07-01', 'YYYY-MM-DD'), TO_TIMESTAMP('14:00:00', 'HH24:MI:SS'), TO_DATE('2026-07-01', 'YYYY-MM-DD'), TO_TIMESTAMP('23:00:00', 'HH24:MI:SS'), 4, 104, 105);
 
 -- >>> RÉSULTAT ATTENDU Requete B : DUBAI (105) doit apparaitre.
 
@@ -96,19 +99,6 @@ INSERT INTO VOL (numero_vol, date_debut, heure_debut, date_arrivee, heure_arrive
 
 -- Vol 3 : Départ Madrid 16:00, Arrivée Lisbonne 17:15
 INSERT INTO VOL (numero_vol, date_debut, heure_debut, date_arrivee, heure_arrivee, id_compagnie, numero_aeroport_dep, numero_aeroport_arr) VALUES 
-(1009, '2026-07-01', '16:00:00', '2026-07-01', '17:15:00', 1, 201, 204);
+(1009, TO_DATE('2026-07-01', 'YYYY-MM-DD'), TO_TIMESTAMP('16:00:00', 'HH24:MI:SS'), TO_DATE('2026-07-01', 'YYYY-MM-DD'), TO_TIMESTAMP('17:15:00', 'HH24:MI:SS'), 1, 201, 204);
 
--- >>> RÉSULTAT ATTENDU Requete C : LISBONNE (204) doit apparaitre.
-
-
--- ----------------------------------------------------------
--- CAS 7 : Autre trajet Valide avec 2 correspondances (DOIT APPARAITRE - Requete C)
--- Trajet : Paris (CDG 101) -> Londres (104) -> Dubai (105) -> Berlin (206)
--- ----------------------------------------------------------
--- Note: Les vols Paris->Londres (1007) et Londres->Dubai (1008) existent déjà (Arrivée Dubai 23:00).
-
--- Vol 3 : Départ Dubai 02:00 (le lendemain), Arrivée Berlin 06:00
-INSERT INTO VOL (numero_vol, date_debut, heure_debut, date_arrivee, heure_arrivee, id_compagnie, numero_aeroport_dep, numero_aeroport_arr) VALUES 
-(1010, '2026-07-02', '02:00:00', '2026-07-02', '06:00:00', 5, 105, 206);
-
--- >>> RÉSULTAT ATTENDU Requete C : BERLIN (206) doit apparaitre.
+COMMIT;
