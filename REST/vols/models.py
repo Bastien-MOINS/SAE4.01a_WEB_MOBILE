@@ -16,6 +16,27 @@ class Compagnie(db.Model):
             'nom_compagnie': self.nom_compagnie,
         }
 
+def get_all_compagnies():
+    return Compagnie.query.all()
+
+def get_compagnie(id_compagnie):
+    return Compagnie.query.get(id_compagnie)
+
+def create_compagnie(nom_compagnie):
+    compagnie = Compagnie(nom_compagnie)
+    db.session.add(compagnie)
+    db.session.commit()
+    return compagnie
+
+def update_compagnie(compagnie, nom_compagnie):
+    compagnie.nom_compagnie = nom_compagnie
+    db.session.commit()
+    return compagnie
+
+def delete_compagnie(compagnie):
+    db.session.delete(compagnie)
+    db.session.commit()
+
 class Aeroport(db.Model):
     __tablename__ = 'AEROPORT'
 
