@@ -36,11 +36,44 @@ class Aeroport(db.Model):
             'ville': self.ville,
             'pays': self.pays
         }
+
+def get_all_aeroports():
+    return Aeroport.query.all()
+
+def get_aeroport_by_id(id):
+    return Aeroport.query.get(id)
+
+def create_aeroport(nom_aeroport, ville, pays):
+    new_aeroport = Aeroport(nom_aeroport, ville, pays)
+    db.session.add(new_aeroport)
+    db.session.commit()
+    return new_aeroport
+
+def update_aeroport(id, nom_aeroport=None, ville=None, pays=None):
+    aeroport = Aeroport.query.get(id)
+    if not aeroport:
+        return None
+    if nom_aeroport is not None:
+        aeroport.nom_aeroport = nom_aeroport
+    if ville is not None:
+        aeroport.ville = ville
+    if pays is not None:
+        aeroport.pays = pays
+    db.session.commit()
+    return aeroport
+
+def delete_aeroport(id):
+    aeroport = Aeroport.query.get(id)
+    if not aeroport:
+        return False
+    db.session.delete(aeroport)
+    db.session.commit()
+    return True
     
 class Vol(db.Model):
     __tablename__ = 'VOL'
 
-    numero_vol = db.Column(db.Integer, primary_key=True)
+    numero_vol = db.Column(db.Integer, primary_key=True, autoincrement=True)
     date_debut = db.Column(db.Date, primary_key=True)
     heure_debut = db.Column(db.DateTime, primary_key=True)
     date_arrivee = db.Column(db.Date)
@@ -55,8 +88,7 @@ class Vol(db.Model):
     aeroport_arrivee = db.relationship('Aeroport', foreign_keys=numero_aeroport_arr)
     terminals = db.relationship('Terminal', back_populates='vol', cascade="all, delete-orphan")
 
-    def __init__(self, numero_vol, date_debut, heure_debut, date_arrivee, heure_arrivee, id_compagnie, numero_aeroport_dep, numero_aeroport_arr):
-        self.numero_vol = numero_vol
+    def __init__(self, date_debut, heure_debut, date_arrivee, heure_arrivee, id_compagnie, numero_aeroport_dep, numero_aeroport_arr):
         self.date_debut = date_debut
         self.heure_debut = heure_debut
         self.date_arrivee = date_arrivee
@@ -76,6 +108,46 @@ class Vol(db.Model):
             'numero_aeroport_dep': self.numero_aeroport_dep,
             'numero_aeroport_arr': self.numero_aeroport_arr
         }
+def get_all_vols():
+    return Vol.query.all()
+
+def get_vol_by_id(id):
+    return Vol.query.get(id)
+
+def create_vol(date_debut, heure_debut, date_arrivee, heure_arrivee, id_compagnie, numero_aeroport_dep, numero_aeroport_arr):
+    new_vol = Vol(date_debut, heure_debut, date_arrivee, heure_arrivee, id_compagnie, numero_aeroport_dep, numero_aeroport_arr)
+    db.session.add(new_vol)
+    db.session.commit()
+    return new_vol
+
+def update_vol(numero_vol, date_debut=None, heure_debut=None, date_arrivee=None, heure_arrivee=None, id_compagnie=None, numero_aeroport_dep=None, numero_aeroport_arr=None):
+    vol = Vol.query.get(numero_vol)
+    if not vol:
+        return None
+    if date_debut is not None:
+        vol.date_debut = date_debut
+    if heure_debut is not None:
+        vol.heure_debut = heure_debut
+    if date_arrivee is not None:
+        vol.date_arrivee = date_arrivee
+    if heure_arrivee is not None:
+        vol.heure_arrivee = heure_arrivee
+    if id_compagnie is not None:
+        vol.id_compagnie = id_compagnie
+    if numero_aeroport_dep is not None:
+        vol.numero_aeroport_dep = numero_aeroport_dep
+    if numero_aeroport_arr is not None:
+        vol.numero_aeroport_arr = numero_aeroport_arr
+    db.session.commit()
+    return vol
+
+def delete_vol(numero_vol):
+    vol = Vol.query.get(numero_vol)
+    if not vol:
+        return False
+    db.session.delete(vol)
+    db.session.commit()
+    return True
     
 class Terminal(db.Model):
     __tablename__ = 'TERMINAL'

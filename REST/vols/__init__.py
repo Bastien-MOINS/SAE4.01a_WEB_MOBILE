@@ -1,5 +1,5 @@
 from.app import app
-import vols.views
+import REST.vols.api_models
 import vols.models
 import vols.commands
 
