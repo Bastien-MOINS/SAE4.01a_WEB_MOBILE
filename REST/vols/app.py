@@ -1,13 +1,8 @@
 from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
-import os
+from .extensions import api, db
 
-def mkpath(p):
-    return os.path.normpath (
-        os.path.join (
-            os.path.dirname(__file__),p)
-    )
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = ('sqlite:///'+mkpath('../vols.db'))
-app.config["SQLALCHEMY_ECHO"] = True
-db = SQLAlchemy(app)
+
+app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///db.sqlite3"
+api.init_app(app)
+db.init_app(app)
