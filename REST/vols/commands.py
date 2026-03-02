@@ -1,6 +1,6 @@
 from .app import app, db
 from .models import Compagnie, Aeroport, Vol, Terminal
-from datetime import datetime, date, timedelta
+from datetime import datetime, date, timedelta, time
 
 @app.cli.command()
 def syncdb():
@@ -36,9 +36,9 @@ def syncdb():
     vol1 = Vol(
         numero_vol=1001,
         date_debut=aujourd_hui,
-        heure_debut=datetime.combine(aujourd_hui, datetime.min.time()).replace(hour=8, minute=0),
+        heure_debut=time(hour=8, minute=0),
         date_arrivee=aujourd_hui,
-        heure_arrivee=datetime.combine(aujourd_hui, datetime.min.time()).replace(hour=10, minute=0),
+        heure_arrivee=time(hour=10, minute=0),
         id_compagnie=air_france.id_compagnie,
         numero_aeroport_dep=cdg.numero_aeroport,
         numero_aeroport_arr=lyon.numero_aeroport
@@ -47,9 +47,9 @@ def syncdb():
     vol2 = Vol(
         numero_vol=1002,
         date_debut=aujourd_hui,
-        heure_debut=datetime.combine(aujourd_hui, datetime.min.time()).replace(hour=10, minute=30),
+        heure_debut=time(hour=10, minute=30),
         date_arrivee=aujourd_hui,
-        heure_arrivee=datetime.combine(aujourd_hui, datetime.min.time()).replace(hour=12, minute=30),
+        heure_arrivee=time(hour=12, minute=30),
         id_compagnie=lufthansa.id_compagnie,
         numero_aeroport_dep=cdg.numero_aeroport,
         numero_aeroport_arr=frankfurth.numero_aeroport
@@ -58,9 +58,9 @@ def syncdb():
     vol3 = Vol(
         numero_vol=1003,
         date_debut=demain,
-        heure_debut=datetime.combine(demain, datetime.min.time()).replace(hour=14, minute=0),
+        heure_debut=time(hour=14, minute=0),
         date_arrivee=demain,
-        heure_arrivee=datetime.combine(demain, datetime.min.time()).replace(hour=16, minute=0),
+        heure_arrivee=time(hour=16, minute=0),
         id_compagnie=ryanair.id_compagnie,
         numero_aeroport_dep=orly.numero_aeroport,
         numero_aeroport_arr=nice.numero_aeroport
@@ -69,35 +69,46 @@ def syncdb():
     vol4 = Vol(
         numero_vol=1004,
         date_debut=demain,
-        heure_debut=datetime.combine(demain, datetime.min.time()).replace(hour=9, minute=0),
+        heure_debut=time(hour=9, minute=0),
         date_arrivee=demain,
-        heure_arrivee=datetime.combine(demain, datetime.min.time()).replace(hour=11, minute=0),
+        heure_arrivee=time(hour=11, minute=0),
         id_compagnie=air_france.id_compagnie,
         numero_aeroport_dep=cdg.numero_aeroport,
         numero_aeroport_arr=berlin.numero_aeroport
     )
+
+    vol5 = Vol(
+        numero_vol=1005,
+        date_debut=demain,
+        heure_debut=time(hour=12, minute=12),
+        date_arrivee=demain,
+        heure_arrivee=time(hour=13, minute=0),
+        id_compagnie=lufthansa.id_compagnie,
+        numero_aeroport_dep=orly.numero_aeroport,
+        numero_aeroport_arr=lyon.numero_aeroport
+    )
     
-    db.session.add_all([vol1, vol2, vol3, vol4])
+    db.session.add_all([vol1, vol2, vol3, vol4, vol5])
     db.session.commit()
     
     # Créer les terminaux
     terminals = [
         Terminal(numero_vol=1001, numero_aeroport=cdg.numero_aeroport, date_debut=aujourd_hui, 
-                heure_debut=datetime.combine(aujourd_hui, datetime.min.time()).replace(hour=8, minute=0)),
+                heure_debut=time(hour=8, minute=0)),
         Terminal(numero_vol=1001, numero_aeroport=lyon.numero_aeroport, date_debut=aujourd_hui, 
-                heure_debut=datetime.combine(aujourd_hui, datetime.min.time()).replace(hour=10, minute=0)),
+                heure_debut=time(hour=10, minute=0)),
         Terminal(numero_vol=1002, numero_aeroport=cdg.numero_aeroport, date_debut=aujourd_hui, 
-                heure_debut=datetime.combine(aujourd_hui, datetime.min.time()).replace(hour=10, minute=30)),
+                heure_debut=time(hour=10, minute=30)),
         Terminal(numero_vol=1002, numero_aeroport=frankfurth.numero_aeroport, date_debut=aujourd_hui, 
-                heure_debut=datetime.combine(aujourd_hui, datetime.min.time()).replace(hour=12, minute=30)),
+                heure_debut=time(hour=12, minute=30)),
         Terminal(numero_vol=1003, numero_aeroport=orly.numero_aeroport, date_debut=demain, 
-                heure_debut=datetime.combine(demain, datetime.min.time()).replace(hour=14, minute=0)),
+                heure_debut=time(hour=14, minute=0)),
         Terminal(numero_vol=1003, numero_aeroport=nice.numero_aeroport, date_debut=demain, 
-                heure_debut=datetime.combine(demain, datetime.min.time()).replace(hour=16, minute=0)),
+                heure_debut=time(hour=16, minute=0)),
         Terminal(numero_vol=1004, numero_aeroport=cdg.numero_aeroport, date_debut=demain, 
-                heure_debut=datetime.combine(demain, datetime.min.time()).replace(hour=9, minute=0)),
+                heure_debut=time(hour=9, minute=0)),
         Terminal(numero_vol=1004, numero_aeroport=berlin.numero_aeroport, date_debut=demain, 
-                heure_debut=datetime.combine(demain, datetime.min.time()).replace(hour=11, minute=0)),
+                heure_debut=time(hour=11, minute=0)),
     ]
     
     db.session.add_all(terminals)
@@ -106,5 +117,5 @@ def syncdb():
     print("✓ Base de données remplie avec succès!")
     print(f"  - {len([air_france, lufthansa, ryanair])} compagnies")
     print(f"  - {len([cdg, orly, lyon, nice, frankfurth, berlin])} aéroports")
-    print(f"  - {len([vol1, vol2, vol3, vol4])} vols")
+    print(f"  - {len([vol1, vol2, vol3, vol4, vol5])} vols")
     print(f"  - {len(terminals)} terminaux")
