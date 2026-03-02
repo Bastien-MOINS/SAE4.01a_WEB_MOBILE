@@ -110,3 +110,6 @@ class Terminal(db.Model):
             'heure_debut': self.heure_debut,
             'id_terminal': self.id_terminal
         }
+    
+def get_all_terminaux():
+    return Terminal.query.all()

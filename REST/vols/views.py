@@ -1,10 +1,14 @@
-from flask import jsonify, abort, make_response, request, url_for
-from .app import app, db
+from .models import Terminal, get_all_terminaux
+from flask_restx import Resource, Namespace
+from .app import api
+from .api_models import terminal_model
 
-@app.errorhandler(404)
-def not_found(error):
-    return make_response(jsonify({'error': 'Not found'}), 404)
+ns_terminal = api.namespace('terminal')
 
-@app.errorhandler(400)
-def bad_request(error):
-    return make_response(jsonify({'error': 'Bad request'}), 400)
+@ns_terminal.route('/')
+class TerminalCollection(Resource):
+    @ns_terminal.doc('list_aeroports')
+    @ns_terminal.marshal_list_with(terminal_model)
+    def get(self):
+        '''Liste tous les terminaux'''
+        return get_all_terminaux()
