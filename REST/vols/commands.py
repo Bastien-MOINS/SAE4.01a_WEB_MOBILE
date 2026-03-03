@@ -94,21 +94,21 @@ def syncdb():
     # Créer les terminaux
     terminals = [
         Terminal(numero_vol=1001, numero_aeroport=cdg.numero_aeroport, date_debut=aujourd_hui, 
-                heure_debut=time(hour=8, minute=0)),
+                heure_debut=time(hour=8, minute=0), id_terminal=1),
         Terminal(numero_vol=1001, numero_aeroport=lyon.numero_aeroport, date_debut=aujourd_hui, 
-                heure_debut=time(hour=10, minute=0)),
+                heure_debut=time(hour=10, minute=0), id_terminal=2),
         Terminal(numero_vol=1002, numero_aeroport=cdg.numero_aeroport, date_debut=aujourd_hui, 
-                heure_debut=time(hour=10, minute=30)),
+                heure_debut=time(hour=10, minute=30), id_terminal=3),
         Terminal(numero_vol=1002, numero_aeroport=frankfurth.numero_aeroport, date_debut=aujourd_hui, 
-                heure_debut=time(hour=12, minute=30)),
+                heure_debut=time(hour=12, minute=30), id_terminal=4),
         Terminal(numero_vol=1003, numero_aeroport=orly.numero_aeroport, date_debut=demain, 
-                heure_debut=time(hour=14, minute=0)),
+                heure_debut=time(hour=14, minute=0), id_terminal=5),
         Terminal(numero_vol=1003, numero_aeroport=nice.numero_aeroport, date_debut=demain, 
-                heure_debut=time(hour=16, minute=0)),
+                heure_debut=time(hour=16, minute=0), id_terminal=6),
         Terminal(numero_vol=1004, numero_aeroport=cdg.numero_aeroport, date_debut=demain, 
-                heure_debut=time(hour=9, minute=0)),
+                heure_debut=time(hour=9, minute=0), id_terminal=7),
         Terminal(numero_vol=1004, numero_aeroport=berlin.numero_aeroport, date_debut=demain, 
-                heure_debut=time(hour=11, minute=0)),
+                heure_debut=time(hour=11, minute=0), id_terminal=8),
     ]
     
     db.session.add_all(terminals)

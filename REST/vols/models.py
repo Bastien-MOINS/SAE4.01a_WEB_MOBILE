@@ -1,4 +1,5 @@
 from .app import db
+from sqlalchemy import func, event
 
 class Compagnie(db.Model):
     __tablename__ = 'COMPAGNIE'
@@ -84,7 +85,7 @@ class Terminal(db.Model):
     numero_aeroport = db.Column(db.Integer, db.ForeignKey('AEROPORT.numero_aeroport'), primary_key=True)
     date_debut = db.Column(db.Date, primary_key=True)
     heure_debut = db.Column(db.Time, primary_key=True)
-    id_terminal = db.Column(db.Integer, autoincrement=True)
+    id_terminal = db.Column(db.Integer, unique=True, nullable=False)
     #Associe les valeurs de Terminal à celle de Vol
     __table_args__ = (
         db.ForeignKeyConstraint(
@@ -96,11 +97,12 @@ class Terminal(db.Model):
     vol = db.relationship('Vol', back_populates='terminals')
     aeroport = db.relationship('Aeroport')
 
-    def __init__(self, numero_vol, numero_aeroport, date_debut, heure_debut):
+    def __init__(self, numero_vol, numero_aeroport, date_debut, heure_debut, id_terminal):
         self.numero_vol = numero_vol
         self.numero_aeroport = numero_aeroport
         self.date_debut = date_debut
         self.heure_debut = heure_debut
+        self.id_terminal = id_terminal
 
     def to_json(self):
         return {
@@ -110,13 +112,35 @@ class Terminal(db.Model):
             'heure_debut': self.heure_debut,
             'id_terminal': self.id_terminal
         }
-    
+      
 def get_all_terminaux():
     return Terminal.query.all()
 
 def create_terminal(numero_vol, numero_aeroport, date_debut, heure_debut):
-    new_terminal = Terminal(numero_vol, numero_aeroport, date_debut, heure_debut)
+    max_id = db.session.query(func.max(Terminal.id_terminal)).scalar()
+    prochain_id = (max_id or 0) + 1
+    new_terminal = Terminal(numero_vol, numero_aeroport, date_debut, heure_debut, prochain_id)
     db.session.add(new_terminal)
     db.session.commit()
-    db.session.refresh(new_terminal)
     return new_terminal
+
+def get_terminal_by_id(id):
+    return Terminal.query.filter_by(id_terminal=id).first()
+
+def delete_terminal(id):
+    terminal = get_terminal_by_id(id)
+    if terminal:
+        db.session.delete(terminal)
+        db.session.commit()
+        return True
+    return False
+
+def update_terminal(id, numero_vol, numero_aeroport, date_debut, heure_debut):
+    terminal = get_terminal_by_id(id)
+    if terminal:
+        terminal.numero_vol = numero_vol
+        terminal.numero_aeroport = numero_aeroport
+        terminal.date_debut = date_debut
+        terminal.heure_debut = heure_debut 
+        db.session.commit()
+        return terminal
