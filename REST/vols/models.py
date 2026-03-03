@@ -75,9 +75,9 @@ class Vol(db.Model):
 
     numero_vol = db.Column(db.Integer, primary_key=True, autoincrement=True)
     date_debut = db.Column(db.Date, primary_key=True)
-    heure_debut = db.Column(db.DateTime, primary_key=True)
+    heure_debut = db.Column(db.Time, primary_key=True)
     date_arrivee = db.Column(db.Date)
-    heure_arrivee = db.Column(db.DateTime)
+    heure_arrivee = db.Column(db.Time)
     
     id_compagnie = db.Column(db.Integer, db.ForeignKey('COMPAGNIE.id_compagnie'))
     numero_aeroport_dep = db.Column(db.Integer, db.ForeignKey('AEROPORT.numero_aeroport'))
@@ -155,7 +155,7 @@ class Terminal(db.Model):
     numero_vol = db.Column(db.Integer, primary_key=True)
     numero_aeroport = db.Column(db.Integer, db.ForeignKey('AEROPORT.numero_aeroport'), primary_key=True)
     date_debut = db.Column(db.Date, primary_key=True)
-    heure_debut = db.Column(db.DateTime, primary_key=True)
+    heure_debut = db.Column(db.Time, primary_key=True)
     id_terminal = db.Column(db.Integer, autoincrement=True)
     #Associe les valeurs de Terminal à celle de Vol
     __table_args__ = (

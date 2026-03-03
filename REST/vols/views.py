@@ -30,11 +30,11 @@ class VolCollection(Resource):
             abort(400, "La date d'arrivée doit être une chaîne de caractères.")
         if not data.get('heure_arrivee') or not isinstance(data.get('heure_arrivee'), str):
             abort(400, "L'heure d'arrivée doit être une chaîne de caractères.")
-        if not data.get('id_compagnie') or not isinstance(data.get('id_compagnie'), int): # TODO : Vérifier que id compagnie existe
+        if data.get('id_compagnie') is None or not isinstance(data.get('id_compagnie'), int): # TODO : Vérifier que id compagnie existe
             abort(400, "L'id de compagnie doit être un entier.")
-        if not data.get('numero_aeroport_dep') or not isinstance(data.get('numero_aeroport_dep'), int):
+        if data.get('numero_aeroport_dep') is None or not isinstance(data.get('numero_aeroport_dep'), int):
             abort(400, "Le numéro de l'aéroport de départ doit être un entier.")
-        if not data.get('numero_aeroport_arr') or not isinstance(data.get('numero_aeroport_arr'), int):
+        if data.get('numero_aeroport_arr') is None or not isinstance(data.get('numero_aeroport_arr'), int):
             abort(400, "Le numéro de l'aéroport d'arrivé doit être un entier.")
 
         return create_vol(
@@ -56,28 +56,28 @@ class VolItem(Resource):
         '''Récupère un vol via son identifiant'''
         aeroport = get_vol_by_id(numero_vol)
         if not aeroport:
-            abort(404, f"L'aéroport avec l'identifiant {id} n'existe pas.")
+            abort(404, f"Le vol avec l'identifiant {id} n'existe pas.")
         return aeroport
 
-    @ns_vol.response(200, 'Aéroport supprimé avec succès')
+    @ns_vol.response(200, 'Vol supprimé avec succès')
     def delete(self, numero_vol):
         '''Supprime un vol via son numéro'''
         if not delete_vol(numero_vol):
-            abort(404, f"Impossible de supprimer : l'aéroport avec l'identifiant {numero_vol} n'existe pas.")
+            abort(404, f"Impossible de supprimer : le vol avec l'identifiant {numero_vol} n'existe pas.")
         return {'status': 'deleted'}, 200
 
     @ns_vol.expect(vol_input_model, validate=True)
     @ns_vol.marshal_with(vol_model)
     def put(self, numero_vol):
-        '''Modifie un aéroport via son identifiant'''
+        '''Modifie un vol via son identifiant'''
         data = ns_vol.payload
         if 'nom_aeroport' in data and not isinstance(data.get('nom_aeroport'), str):
-            abort(400, "Le nom de l'aéroport doit être une chaîne de caractères.")
+            abort(400, "Le nom de vol doit être une chaîne de caractères.")
         if 'ville' in data and not isinstance(data.get('ville'), str):
             abort(400, "La ville doit être une chaîne de caractères.")
         if 'pays' in data and not isinstance(data.get('pays'), str):
             abort(400, "Le pays doit être une chaîne de caractères.")
         vol = update_vol(numero_vol=numero_vol, nom_aeroport=data.get('nom_aeroport'), ville=data.get('ville'), pays=data.get('pays'))
         if not vol:
-            abort(404, f"Impossible de modifier : l'aéroport avec l'identifiant {id} n'existe pas.")
+            abort(404, f"Impossible de modifier : le vol avec l'identifiant {id} n'existe pas.")
         return vol
