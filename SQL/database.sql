@@ -12,6 +12,14 @@ CREATE TABLE AEROPORT (
     PRIMARY KEY(numero_aeroport)
 );
 
+CREATE TABLE TERMINAL (
+    numero_aeroport INTEGER NOT NULL,
+    id_terminal INTEGER,
+    nom_terminal VARCHAR2(38),
+    PRIMARY KEY(numero_aeroport, id_terminal),
+    FOREIGN KEY (numero_aeroport) REFERENCES AEROPORT (numero_aeroport)
+);
+
 CREATE TABLE VOL (
     numero_vol INTEGER NOT NULL,
     date_debut DATE NOT NULL,
@@ -20,20 +28,12 @@ CREATE TABLE VOL (
     heure_arrivee TIMESTAMP,
     id_compagnie INTEGER,
     numero_aeroport_dep INTEGER,
+    id_terminal_dep INTEGER,
     numero_aeroport_arr INTEGER,
+    id_terminal_arr INTEGER,
     PRIMARY KEY(numero_vol, date_debut, heure_debut),
     FOREIGN KEY (id_compagnie) REFERENCES COMPAGNIE (id_compagnie),
-    FOREIGN KEY (numero_aeroport_dep) REFERENCES AEROPORT (numero_aeroport),
-    FOREIGN KEY (numero_aeroport_arr) REFERENCES AEROPORT (numero_aeroport)
+    FOREIGN KEY (numero_aeroport_dep, id_terminal_dep) REFERENCES TERMINAL (numero_aeroport, id_terminal),
+    FOREIGN KEY (numero_aeroport_arr, id_terminal_arr) REFERENCES TERMINAL (numero_aeroport, id_terminal)
 );
 
-CREATE TABLE TERMINAL (
-    numero_vol INTEGER NOT NULL,
-    numero_aeroport INTEGER NOT NULL,
-    date_debut DATE NOT NULL,
-    heure_debut TIMESTAMP NOT NULL,
-    id_terminal INTEGER,
-    PRIMARY KEY(numero_vol, numero_aeroport, date_debut, heure_debut),
-    FOREIGN KEY (numero_vol, date_debut, heure_debut) REFERENCES VOL (numero_vol, date_debut, heure_debut),
-    FOREIGN KEY (numero_aeroport) REFERENCES AEROPORT (numero_aeroport)
-);
