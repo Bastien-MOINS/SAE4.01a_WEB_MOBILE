@@ -1,4 +1,4 @@
-from datetime import date, datetime
+from datetime import date, time
 from .app import app, db
 from .models import Compagnie, Aeroport, Vol, Terminal
 
@@ -32,9 +32,9 @@ def syncdb():
         Vol(
             numero_vol=1001,
             date_debut=date(2024, 7, 1),
-            heure_debut=datetime(2024, 7, 1, 9, 30),
+            heure_debut=time(7, 1, 9),
             date_arrivee=date(2024, 7, 1),
-            heure_arrivee=datetime(2024, 7, 1, 11, 5),
+            heure_arrivee=time(7, 1, 11),
             id_compagnie=af.id_compagnie,
             numero_aeroport_dep=cdg.numero_aeroport,
             id_terminal_dep=0,
@@ -44,9 +44,9 @@ def syncdb():
         Vol(
             numero_vol=2002,
             date_debut=date(2024, 7, 2),
-            heure_debut=datetime(2024, 7, 2, 14, 10),
+            heure_debut=time(7, 2, 14, 10),
             date_arrivee=date(2024, 7, 2),
-            heure_arrivee=datetime(2024, 7, 2, 15, 25),
+            heure_arrivee=time(7, 2, 15, 25),
             id_compagnie=ez.id_compagnie,
             numero_aeroport_dep=lhr.numero_aeroport,
             id_terminal_dep=2,
