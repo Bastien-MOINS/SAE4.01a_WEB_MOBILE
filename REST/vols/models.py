@@ -36,39 +36,6 @@ class Aeroport(db.Model):
             'ville': self.ville,
             'pays': self.pays
         }
-
-def get_all_aeroports():
-    return Aeroport.query.all()
-
-def get_aeroport_by_id(id):
-    return Aeroport.query.get(id)
-
-def create_aeroport(nom_aeroport, ville, pays):
-    new_aeroport = Aeroport(nom_aeroport, ville, pays)
-    db.session.add(new_aeroport)
-    db.session.commit()
-    return new_aeroport
-
-def update_aeroport(id, nom_aeroport=None, ville=None, pays=None):
-    aeroport = Aeroport.query.get(id)
-    if not aeroport:
-        return None
-    if nom_aeroport is not None:
-        aeroport.nom_aeroport = nom_aeroport
-    if ville is not None:
-        aeroport.ville = ville
-    if pays is not None:
-        aeroport.pays = pays
-    db.session.commit()
-    return aeroport
-
-def delete_aeroport(id):
-    aeroport = Aeroport.query.get(id)
-    if not aeroport:
-        return False
-    db.session.delete(aeroport)
-    db.session.commit()
-    return True
     
 class Vol(db.Model):
     __tablename__ = 'VOL'
