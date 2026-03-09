@@ -1,3 +1,4 @@
+from datetime import date, time
 from .app import app, db
 from .models import Compagnie, Aeroport, Vol, Terminal
 from datetime import date, timedelta, time
@@ -53,7 +54,7 @@ def syncdb():
             heure_arrivee=time(10, 0),
             id_compagnie=air_france.id_compagnie,
             numero_aeroport_dep=cdg.numero_aeroport,
-            id_terminal_dep=t1_cdg.id_terminal,  # Relation avec le terminal
+            id_terminal_dep=t1_cdg.id_terminal,
             numero_aeroport_arr=lyon.numero_aeroport,
             id_terminal_arr=t_lyon.id_terminal
         ),

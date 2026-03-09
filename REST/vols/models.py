@@ -143,6 +143,114 @@ class Terminal(db.Model):
             'nom_terminal' : self.nom_terminal
         }
 
+
+def _parse_date(value):
+    if value is None:
+        return None
+    if isinstance(value, date):
+        return value
+    return date.fromisoformat(value)
+
+
+def _parse_time(value):
+    if value is None:
+        return None
+    if isinstance(value, time):
+        return value
+    if isinstance(value, datetime):
+        return value.time()
+    if isinstance(value, str):
+        try:
+            return time.fromisoformat(value)
+        except ValueError:
+            pass
+        # Fallback to common formats
+        for fmt in ("%H:%M:%S", "%H:%M"):
+            try:
+                return datetime.strptime(value, fmt).time()
+            except ValueError:
+                continue
+    return value
+
+
+def get_all_vols():
+    return Vol.query.all()
+
+def get_vol_by_id(numero_vol):
+    return Vol.query.get(numero_vol)
+
+def create_vol(
+    date_debut,
+    heure_debut,
+    date_arrivee,
+    heure_arrivee,
+    id_compagnie,
+    numero_aeroport_dep,
+    numero_aeroport_arr,
+    id_terminal_dep=None,
+    id_terminal_arr=None,
+):
+    vol = Vol(
+        numero_vol=None,
+        date_debut=_parse_date(date_debut),
+        heure_debut=_parse_time(heure_debut),
+        date_arrivee=_parse_date(date_arrivee),
+        heure_arrivee=_parse_time(heure_arrivee),
+        id_compagnie=id_compagnie,
+        numero_aeroport_dep=numero_aeroport_dep,
+        id_terminal_dep=id_terminal_dep,
+        numero_aeroport_arr=numero_aeroport_arr,
+        id_terminal_arr=id_terminal_arr,
+    )
+    db.session.add(vol)
+    db.session.commit()
+    return vol
+
+def update_vol(
+    numero_vol,
+    date_debut=None,
+    heure_debut=None,
+    date_arrivee=None,
+    heure_arrivee=None,
+    id_compagnie=None,
+    numero_aeroport_dep=None,
+    numero_aeroport_arr=None,
+    id_terminal_dep=None,
+    id_terminal_arr=None,
+):
+    vol = Vol.query.get(numero_vol)
+    if not vol:
+        return None
+    if date_debut is not None:
+        vol.date_debut = _parse_date(date_debut)
+    if heure_debut is not None:
+        vol.heure_debut = _parse_time(heure_debut)
+    if date_arrivee is not None:
+        vol.date_arrivee = _parse_date(date_arrivee)
+    if heure_arrivee is not None:
+        vol.heure_arrivee = _parse_time(heure_arrivee)
+    if id_compagnie is not None:
+        vol.id_compagnie = id_compagnie
+    if numero_aeroport_dep is not None:
+        vol.numero_aeroport_dep = numero_aeroport_dep
+    if numero_aeroport_arr is not None:
+        vol.numero_aeroport_arr = numero_aeroport_arr
+    if id_terminal_dep is not None:
+        vol.id_terminal_dep = id_terminal_dep
+    if id_terminal_arr is not None:
+        vol.id_terminal_arr = id_terminal_arr
+    db.session.commit()
+    return vol
+
+def delete_vol(numero_vol):
+    vol = Vol.query.get(numero_vol)
+    if not vol:
+        return False
+    db.session.delete(vol)
+    db.session.commit()
+    return True
+
+
 def get_all_terminaux():
     return Terminal.query.all()
 
@@ -188,32 +296,3 @@ def update_terminal(id_terminal, numero_aeroport, nom_terminal):
         terminal.nom_terminal = nom_terminal
         db.session.commit()
         return terminal
-
-
-def _parse_date(value):
-    if value is None:
-        return None
-    if isinstance(value, date):
-        return value
-    return date.fromisoformat(value)
-
-
-def _parse_time(value):
-    if value is None:
-        return None
-    if isinstance(value, time):
-        return value
-    if isinstance(value, datetime):
-        return value.time()
-    if isinstance(value, str):
-        try:
-            return time.fromisoformat(value)
-        except ValueError:
-            pass
-        # Fallback to common formats
-        for fmt in ("%H:%M:%S", "%H:%M"):
-            try:
-                return datetime.strptime(value, fmt).time()
-            except ValueError:
-                continue
-    return value
