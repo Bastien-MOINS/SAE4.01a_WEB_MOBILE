@@ -1,10 +1,101 @@
+
 from flask import jsonify, abort, make_response, request, url_for
-from .app import app, db
+from flask_restx import Resource, fields
+from .app import app, db, api
+from .models import Vol, get_all_vols, get_vol_by_id, create_vol, update_vol, delete_vol
+from .api_models import vol_model, vol_input_model
 
-@app.errorhandler(404)
-def not_found(error):
-    return make_response(jsonify({'error': 'Not found'}), 404)
+ns_vol = api.namespace('vol')
 
-@app.errorhandler(400)
-def bad_request(error):
-    return make_response(jsonify({'error': 'Bad request'}), 400)
+@ns_vol.route('/')
+class VolCollection(Resource):
+    @ns_vol.doc('list_vols')
+    @ns_vol.marshal_list_with(vol_model)
+    def get(self):
+        '''Liste tous les vols'''
+        return get_all_vols()
+
+    @ns_vol.doc('create_vol')
+    @ns_vol.expect(vol_input_model, validate=True)
+    @ns_vol.marshal_with(vol_model, code=201)
+    def post(self):
+        '''Crée un nouveau vol'''
+        data = ns_vol.payload
+        
+        if not data.get('date_debut') or not isinstance(data.get('date_debut'), str):
+            abort(400, "La date de début doit être une chaîne de caratères.")
+        if not data.get('heure_debut') or not isinstance(data.get('heure_debut'), str):
+            abort(400, "L'heure du début doit être une chaîne de caractères.")
+        if not data.get('date_arrivee') or not isinstance(data.get('date_arrivee'), str):
+            abort(400, "La date d'arrivée doit être une chaîne de caractères.")
+        if not data.get('heure_arrivee') or not isinstance(data.get('heure_arrivee'), str):
+            abort(400, "L'heure d'arrivée doit être une chaîne de caractères.")
+        if data.get('id_compagnie') is None or not isinstance(data.get('id_compagnie'), int): # TODO : Vérifier que id compagnie existe
+            abort(400, "L'id de compagnie doit être un entier.")
+        if data.get('numero_aeroport_dep') is None or not isinstance(data.get('numero_aeroport_dep'), int):
+            abort(400, "Le numéro de l'aéroport de départ doit être un entier.")
+        if data.get('numero_aeroport_arr') is None or not isinstance(data.get('numero_aeroport_arr'), int):
+            abort(400, "Le numéro de l'aéroport d'arrivé doit être un entier.")
+
+        return create_vol(
+            date_debut=data.get('date_debut'), 
+            heure_debut=data.get('heure_debut'), 
+            date_arrivee=data.get('date_arrivee'), 
+            heure_arrivee=data.get('heure_arrivee'), 
+            id_compagnie=data.get('id_compagnie'), 
+            numero_aeroport_dep=data.get('numero_aeroport_dep'), 
+            numero_aeroport_arr=data.get('numero_aeroport_arr')
+        ), 201
+
+@ns_vol.route('/<int:numero_vol>')
+@ns_vol.response(404, 'Vol non trouvé')
+@ns_vol.param('numero_vol', 'L\'identifiant du vol')
+class VolItem(Resource):
+    @ns_vol.marshal_with(vol_model)
+    def get(self, numero_vol):
+        '''Récupère un vol via son identifiant'''
+        vol = get_vol_by_id(numero_vol)
+        if not vol:
+            abort(404, f"Le vol avec l'identifiant {numero_vol} n'existe pas.")
+        return vol
+
+    @ns_vol.response(200, 'Vol supprimé avec succès')
+    def delete(self, numero_vol):
+        '''Supprime un vol via son numéro'''
+        if not delete_vol(numero_vol):
+            abort(404, f"Impossible de supprimer : le vol avec l'identifiant {numero_vol} n'existe pas.")
+        return {'status': 'deleted'}, 200
+
+    @ns_vol.expect(vol_input_model, validate=True)
+    @ns_vol.marshal_with(vol_model)
+    def put(self, numero_vol):
+        '''Modifie un vol via son identifiant'''
+        data = ns_vol.payload
+        if 'date_debut' in data and not isinstance(data.get('date_debut'), str):
+            abort(400, "La date de début doit être une chaîne de caractères.")
+        if 'heure_debut' in data and not isinstance(data.get('heure_debut'), str):
+            abort(400, "L'heure du début doit être une chaîne de caractères.")
+        if 'date_arrivee' in data and not isinstance(data.get('date_arrivee'), str):
+            abort(400, "La date d'arrivée doit être une chaîne de caractères.")
+        if 'heure_arrivee' in data and not isinstance(data.get('heure_arrivee'), str):
+            abort(400, "L'heure d'arrivée doit être une chaîne de caractères.")
+        if 'id_compagnie' in data and not isinstance(data.get('id_compagnie'), int):
+            abort(400, "L'id de compagnie doit être un entier.")
+        if 'numero_aeroport_dep' in data and not isinstance(data.get('numero_aeroport_dep'), int):
+            abort(400, "Le numéro de l'aéroport de départ doit être un entier.")
+        if 'numero_aeroport_arr' in data and not isinstance(data.get('numero_aeroport_arr'), int):
+            abort(400, "Le numéro de l'aéroport d'arrivé doit être un entier.")
+
+        vol = update_vol(
+            numero_vol=numero_vol,
+            date_debut=data.get('date_debut'),
+            heure_debut=data.get('heure_debut'),
+            date_arrivee=data.get('date_arrivee'),
+            heure_arrivee=data.get('heure_arrivee'),
+            id_compagnie=data.get('id_compagnie'),
+            numero_aeroport_dep=data.get('numero_aeroport_dep'),
+            numero_aeroport_arr=data.get('numero_aeroport_arr'),
+        )
+        if not vol:
+            abort(404, f"Impossible de modifier : le vol avec l'identifiant {numero_vol} n'existe pas.")
+        return vol
