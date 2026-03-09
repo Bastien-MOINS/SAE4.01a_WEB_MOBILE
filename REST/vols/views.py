@@ -1,5 +1,5 @@
 from flask import abort
-from .models import Aeroport, Vol, Terminal, get_all_terminaux, create_terminal, get_terminal_by_id, update_terminal, delete_terminal
+from .models import Aeroport, Vol, Terminal, get_all_terminaux, create_terminal, get_terminal_by_id, update_terminal, delete_terminal, terminal_est_occupe_ou_reserve
 from flask_restx import Resource, Namespace
 from .app import api
 from .api_models import terminal_model, terminal_input_model
@@ -60,6 +60,9 @@ class TerminalItem(Resource):
     @ns_terminal.response(200, 'Terminal supprimé avec succès')
     def delete(self, id):
         '''Supprime un terminal via son identifiant'''
+        if terminal_est_occupe_ou_reserve(id):
+            abort(400, "Impossible de supprimer ce terminal. Des vols y sont rattachés.")
+
         if not delete_terminal(id):
             abort(404, f"Impossible de supprimer : le terminal avec l'identifiant {id} n'existe pas.")
         return {'status': 'deleted'}, 200

@@ -1,6 +1,6 @@
 from datetime import date, time, datetime
 from .app import db
-from sqlalchemy import func, event
+from sqlalchemy import func, or_, event, and_
 
 class Compagnie(db.Model):
     __tablename__ = 'COMPAGNIE'
@@ -154,6 +154,23 @@ def create_terminal(numero_aeroport, nom_terminal):
 
 def get_terminal_by_id(id):
     return Terminal.query.filter_by(id_terminal=id).first()
+
+def terminal_est_occupe_ou_reserve(terminal_id):
+    maintenant = datetime.now()
+    vols_lies = Vol.query.filter(
+        or_(
+            Vol.id_terminal_dep == terminal_id,
+            Vol.id_terminal_arr == terminal_id
+        )
+    ).all()
+    for vol in vols_lies:
+        debut_vol = datetime.combine(vol.date_debut, vol.heure_debut)
+        fin_vol = datetime.combine(vol.date_arrivee, vol.heure_arrivee)
+        if debut_vol > maintenant:
+            return True 
+        if debut_vol <= maintenant <= fin_vol:
+            return True
+    return False
 
 def delete_terminal(id):
     terminal = get_terminal_by_id(id)
