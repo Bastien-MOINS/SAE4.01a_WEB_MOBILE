@@ -26,30 +26,19 @@ class TerminalCollection(Resource):
         '''Crée un nouveau terminal'''
         data = ns_terminal.payload
 
-        try:
-            date_debut_conv = datetime.strptime(data.get('date_debut'), '%Y-%m-%d').date()
-            heure_debut_conv = datetime.strptime(data.get('heure_debut'), '%H:%M').time()
-        except (ValueError, TypeError):
-            abort(400, "Format de date/heure invalide. Utilisez: YYYY-MM-DD et HH:MM")
+        if not data.get('nom_terminal'):
+            abort(400, "Veuillez rentrer le nom du Terminal.")
 
-        if not data.get('numero_vol') or not isinstance(data.get('numero_vol'), int):
-            abort(400, "Le numéro de vol doit être un entier(et > 0).")
-        clef = (data.get('numero_vol'), date_debut_conv, heure_debut_conv)
-        vol = Vol.query.get(clef)
-        if not vol:
-            abort(400, "Le numéro de vol n'existe pas.")
-        
-        if not data.get('numero_aeroport') or not isinstance(data.get('numero_aeroport'), int):
+        num_aero = data.get('numero_aeroport')
+        if 'numero_aeroport' in data and not isinstance(num_aero, int):
             abort(400, "Le numéro d'aéroport doit être un entier(et > 0).")
-        aeroport = Aeroport.query.get(data.get('numero_aeroport'))
+        aeroport = Aeroport.query.get(num_aero)
         if not aeroport:
             abort(400, "Le numéro d'aéroport n'existe pas.")
 
         return create_terminal(
-            numero_vol=data.get('numero_vol'),
-            numero_aeroport=data.get('numero_aeroport'),
-            date_debut=date_debut_conv,
-            heure_debut=heure_debut_conv
+            numero_aeroport=num_aero,
+            nom_terminal=data.get('nom_terminal')
         ), 201
 
 
@@ -81,32 +70,11 @@ class TerminalItem(Resource):
     def put(self, id):
         '''Modifie un terminal via son identifiant'''
         data = ns_terminal.payload
-        terminal_avant_maj = get_terminal_by_id(id)
-        if not terminal_avant_maj:
-            abort(404, f"Le terminal avec l'identifiant {id} n'existe pas.")
 
-        try:
-            if 'date_debut' in data:
-                date_debut_conv = datetime.strptime(data.get('date_debut'), '%Y-%m-%d').date()
-            else:
-                date_debut_conv = terminal_avant_maj.date_debut
-            if 'heure_debut' in data:
-                heure_debut_conv = datetime.strptime(data.get('heure_debut'), '%H:%M').time()
-            else:
-                heure_debut_conv = terminal_avant_maj.heure_debut
-        except (ValueError, TypeError):
-            abort(400, "Format de date/heure invalide. Utilisez: YYYY-MM-DD et HH:MM")
+        if not data.get('nom_terminal'):
+            abort(400, "Veuillez rentrer le nouveau nom du Terminal.")
 
-        num_vol = data.get('numero_vol') if 'numero_vol' in data else terminal_avant_maj.numero_vol
-        num_aero = data.get('numero_aeroport') if 'numero_aeroport' in data else terminal_avant_maj.numero_aeroport
-
-        if 'numero_vol' in data and not isinstance(num_vol, int):
-            abort(400, "Le numéro de vol doit être un entier(et > 0).")
-        clef = (num_vol, date_debut_conv, heure_debut_conv)
-        vol = Vol.query.get(clef)
-        if not vol:
-            abort(400, "Le numéro de vol n'existe pas.")
-
+        num_aero = data.get('numero_aeroport')
         if 'numero_aeroport' in data and not isinstance(num_aero, int):
             abort(400, "Le numéro d'aéroport doit être un entier(et > 0).")
         aeroport = Aeroport.query.get(num_aero)
@@ -114,11 +82,9 @@ class TerminalItem(Resource):
             abort(400, "Le numéro d'aéroport n'existe pas.")
 
         terminal = update_terminal(
-            id=id,
-            numero_vol=num_vol,
+            id_terminal=id,
             numero_aeroport=num_aero,
-            date_debut=date_debut_conv,
-            heure_debut=heure_debut_conv
+            nom_terminal=data.get('nom_terminal')
         )
         
         if not terminal:

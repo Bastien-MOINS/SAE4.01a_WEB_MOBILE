@@ -143,37 +143,34 @@ class Terminal(db.Model):
             'nom_terminal' : self.nom_terminal
         }
 
-# def get_all_terminaux():
-#     return Terminal.query.all()
+def get_all_terminaux():
+    return Terminal.query.all()
 
-# def create_terminal(numero_vol, numero_aeroport, date_debut, heure_debut):
-#     max_id = db.session.query(func.max(Terminal.id_terminal)).scalar()
-#     prochain_id = (max_id or 0) + 1
-#     new_terminal = Terminal(numero_vol, numero_aeroport, date_debut, heure_debut, prochain_id)
-#     db.session.add(new_terminal)
-#     db.session.commit()
-#     return new_terminal
+def create_terminal(numero_aeroport, nom_terminal):
+    new_terminal = Terminal(numero_aeroport, nom_terminal)
+    db.session.add(new_terminal)
+    db.session.commit()
+    return new_terminal
 
-# def get_terminal_by_id(id):
-#     return Terminal.query.filter_by(id_terminal=id).first()
+def get_terminal_by_id(id):
+    return Terminal.query.filter_by(id_terminal=id).first()
 
-# def delete_terminal(id):
-#     terminal = get_terminal_by_id(id)
-#     if terminal:
-#         db.session.delete(terminal)
-#         db.session.commit()
-#         return True
-#     return False
+def delete_terminal(id):
+    terminal = get_terminal_by_id(id)
+    if terminal:
+        db.session.delete(terminal)
+        db.session.commit()
+        return True
+    return False
 
-# def update_terminal(id, numero_vol, numero_aeroport, date_debut, heure_debut):
-#     terminal = get_terminal_by_id(id)
-#     if terminal:
-#         terminal.numero_vol = numero_vol
-#         terminal.numero_aeroport = numero_aeroport
-#         terminal.date_debut = date_debut
-#         terminal.heure_debut = heure_debut 
-#         db.session.commit()
-#         return terminal
+def update_terminal(id_terminal, numero_aeroport, nom_terminal):
+    terminal = get_terminal_by_id(id_terminal)
+    if terminal:
+        terminal.id_terminal = id_terminal
+        terminal.numero_aeroport = numero_aeroport
+        terminal.nom_terminal = nom_terminal
+        db.session.commit()
+        return terminal
 
 
 def _parse_date(value):
