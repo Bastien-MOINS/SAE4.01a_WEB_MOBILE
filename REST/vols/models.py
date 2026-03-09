@@ -1,5 +1,6 @@
 from datetime import date, time, datetime
 from .app import db
+from sqlalchemy import func, or_, event, and_
 
 class Compagnie(db.Model):
     __tablename__ = 'COMPAGNIE'
@@ -40,7 +41,6 @@ class Aeroport(db.Model):
     
 class Vol(db.Model):
     __tablename__ = 'VOL'
-
     numero_vol = db.Column(db.Integer, primary_key=True, autoincrement=True)
     date_debut = db.Column(db.Date)
     heure_debut = db.Column(db.Time)
@@ -176,10 +176,8 @@ def _parse_time(value):
 def get_all_vols():
     return Vol.query.all()
 
-
 def get_vol_by_id(numero_vol):
     return Vol.query.get(numero_vol)
-
 
 def create_vol(
     date_debut,
@@ -207,7 +205,6 @@ def create_vol(
     db.session.add(vol)
     db.session.commit()
     return vol
-
 
 def update_vol(
     numero_vol,
@@ -245,7 +242,6 @@ def update_vol(
     db.session.commit()
     return vol
 
-
 def delete_vol(numero_vol):
     vol = Vol.query.get(numero_vol)
     if not vol:
@@ -253,3 +249,50 @@ def delete_vol(numero_vol):
     db.session.delete(vol)
     db.session.commit()
     return True
+
+
+def get_all_terminaux():
+    return Terminal.query.all()
+
+def create_terminal(numero_aeroport, nom_terminal):
+    new_terminal = Terminal(numero_aeroport, nom_terminal)
+    db.session.add(new_terminal)
+    db.session.commit()
+    return new_terminal
+
+def get_terminal_by_id(id):
+    return Terminal.query.filter_by(id_terminal=id).first()
+
+def terminal_est_occupe_ou_reserve(terminal_id):
+    maintenant = datetime.now()
+    vols_lies = Vol.query.filter(
+        or_(
+            Vol.id_terminal_dep == terminal_id,
+            Vol.id_terminal_arr == terminal_id
+        )
+    ).all()
+    for vol in vols_lies:
+        debut_vol = datetime.combine(vol.date_debut, vol.heure_debut)
+        fin_vol = datetime.combine(vol.date_arrivee, vol.heure_arrivee)
+        if debut_vol > maintenant:
+            return True 
+        if debut_vol <= maintenant <= fin_vol:
+            return True
+    return False
+
+def delete_terminal(id):
+    terminal = get_terminal_by_id(id)
+    if terminal:
+        db.session.delete(terminal)
+        db.session.commit()
+        return True
+    return False
+
+def update_terminal(id_terminal, numero_aeroport, nom_terminal):
+    terminal = get_terminal_by_id(id_terminal)
+    if terminal:
+        terminal.id_terminal = id_terminal
+        terminal.numero_aeroport = numero_aeroport
+        terminal.nom_terminal = nom_terminal
+        db.session.commit()
+        return terminal

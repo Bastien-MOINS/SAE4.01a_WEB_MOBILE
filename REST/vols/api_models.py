@@ -1,4 +1,3 @@
-
 from flask_restx import fields
 from .app import api
 
@@ -22,3 +21,15 @@ vol_input_model = api.model('VolInput', {
     'numero_aeroport_dep': fields.Integer(required=True),
     'numero_aeroport_arr': fields.Integer(required=True)
 })
+
+terminal_model = api.model('Terminal', {
+    'numero_aeroport': fields.Integer,
+    'id_terminal': fields.Integer,
+    'nom_terminal': fields.String
+})
+
+terminal_input_model = api.model('TerminalInput', {
+    'numero_aeroport': fields.Integer,
+    'nom_terminal': fields.String
+})
+
