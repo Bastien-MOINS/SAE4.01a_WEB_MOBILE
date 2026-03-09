@@ -1,5 +1,5 @@
-from .app import db
-
+from .extensions import db
+from .exceptions import CompagnieIdNotFoundException, CompagnieNotEmptyException
 class Compagnie(db.Model):
     __tablename__ = 'COMPAGNIE'
 
@@ -28,14 +28,21 @@ def create_compagnie(nom_compagnie):
     db.session.commit()
     return compagnie
 
-def update_compagnie(compagnie, nom_compagnie):
+def update_compagnie(id_compagnie, nom_compagnie):
+    compagnie = get_compagnie(id_compagnie)
     compagnie.nom_compagnie = nom_compagnie
     db.session.commit()
     return compagnie
 
-def delete_compagnie(compagnie):
+def delete_compagnie(id_compagnie):
+    compagnie = get_compagnie(id_compagnie)
+    if not compagnie:
+        raise CompagnieIdNotFoundException(f"Impossible de supprimer : la compagnie avec l'identifiant {id_compagnie} n'existe pas.")
+    if(len(compagnie.vols)!=0):#TODO Vérifier sur la liste de vols en cours ou programmés et non pas sur tout les vols
+        raise CompagnieNotEmptyException("Il reste des vols dans la compagnie")
     db.session.delete(compagnie)
     db.session.commit()
+
 
 class Aeroport(db.Model):
     __tablename__ = 'AEROPORT'

@@ -1,57 +1,64 @@
 from flask import jsonify, abort, make_response, request, url_for
-from .app import app, db
+from .app import app
+from flask_restx import Resource, fields
 from .models import *
+from .api_models import compagnie_input_model, compagnie_model
+from .extensions import api, db
 
-@app.errorhandler(404)
-def not_found(error):
-    return make_response(jsonify({'error': 'Not found'}), 404)
 
-@app.errorhandler(400)
-def bad_request(error):
-    return make_response(jsonify({'error': 'Bad request'}), 400)
+ns_compagnie = api.namespace('compagnies')
 
-@app.route('/vols_app/api/v1.0/compagnies', methods = ['GET'])
-def get_compagnies():
-    compagnies = get_all_compagnies()
-    res = []
-    if compagnies:
-        for compagnie in compagnies:
-            res.append(compagnie.to_json())
-        return jsonify({'compagnies': res})
-    return abort(404)
+@ns_compagnie.route('/')
+class CompagnieCollection(Resource):
+    @ns_compagnie.doc('list_compagnies')
+    @ns_compagnie.marshal_list_with(compagnie_model)
+    def get(self):
+        '''Liste toutes les compagnies'''
+        return get_all_compagnies()
 
-@app.route('/vols_app/api/v1.0/compagnies/<int:id_compagnie>', methods = ['GET'])
-def get_compagnie_view(id_compagnie):
-    compagnie = get_compagnie(id_compagnie)
-    if compagnie:
-        return jsonify({'compagnie': compagnie.to_json()})
-    return abort(404)
-
-@app.route('/vols_app/api/v1.0/compagnies', methods=['POST'])
-def add_compagnie():
-    if not request.json or 'nom_compagnie' not in request.json:
-        abort(400)
-    
-    compagnie = create_compagnie(request.json['nom_compagnie'])
-    return jsonify({'compagnie': compagnie.to_json()}), 201
-
-@app.route('/vols_app/api/v1.0/compagnies/<int:id_compagnie>', methods=['PUT'])
-def modif_compagnie(id_compagnie):
-    compagnie = get_compagnie(id_compagnie)
-    if not compagnie:
-        abort(404)
-    if not request.json:
-        abort(400)
-    
-    if 'nom_compagnie' in request.json:
-        update_compagnie(compagnie, request.json['nom_compagnie'])
+    @ns_compagnie.doc('create_compagnie')
+    @ns_compagnie.expect(compagnie_input_model, validate=True)
+    @ns_compagnie.marshal_with(compagnie_model, code=201)
+    def post(self):
+        '''Crée une nouvelle compagnie'''
+        data = ns_compagnie.payload
         
-    return jsonify({'compagnie': compagnie.to_json()})
+        if not data.get('nom_compagnie') or not isinstance(data.get('nom_compagnie'), str):
+            abort(400, "La nom de la compagnie doit être une chaîne de caractères.")
 
-@app.route('/vols_app/api/v1.0/compagnies/<int:id_compagnie>', methods=['DELETE'])
-def remove_compagnie(id_compagnie):
-    compagnie = get_compagnie(id_compagnie)
-    if not compagnie:
-        abort(404)
-    delete_compagnie(compagnie)
-    return jsonify({'status': 'deleted'})
+        return create_compagnie(nom_compagnie=data.get('nom_compagnie')), 201
+
+@ns_compagnie.route('/<int:id>')
+@ns_compagnie.response(404, 'Compagnie non trouvé')
+@ns_compagnie.param('id', 'L\'identifiant de la compagnie')
+class CompagnieItem(Resource):
+    @ns_compagnie.marshal_with(compagnie_model)
+    def get(self, id):
+        '''Récupère une compagnie via son identifiant'''
+        compagnie = get_compagnie(id)
+        if not compagnie:
+            abort(404, f"La compagnie avec l'identifiant {id} n'existe pas.")
+        return compagnie
+
+    @ns_compagnie.response(200, 'Compagnie supprimé avec succès')
+    def delete(self, id):
+        '''Supprime une compagnie via son identifiant'''
+        try:
+            delete_compagnie(id)
+        except CompagnieIdNotFoundException:
+            abort(404, f"Impossible de supprimer : la compagnie avec l'identifiant {id_compagnie} n'existe pas.")
+        except CompagnieNotEmptyException:
+            abort(400, "Il reste des vols dans la compagnie")
+        return {'status': 'deleted'}, 200
+
+    @ns_compagnie.expect(compagnie_input_model, validate=True)
+    @ns_compagnie.marshal_with(compagnie_model)
+    def put(self, id):
+        '''Modifie une compagnie via son identifiant'''
+        data = ns_compagnie.payload
+        if 'nom_compagnie' in data and not isinstance(data.get('nom_compagnie'), str):
+            abort(400, "Le nom de la compagnie doit être une chaîne de caractères.")
+        compagnie = update_compagnie(id_compagnie=id, nom_compagnie=data.get('nom_compagnie'))
+        if not compagnie:
+            abort(404, f"Impossible de modifier : la compagnie avec l'identifiant {id} n'existe pas.")
+        return compagnie
