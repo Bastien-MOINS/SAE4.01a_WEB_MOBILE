@@ -1,5 +1,5 @@
 from .app import app
-from . import views
-from . import models
-from . import commands
-
+import vols.views
+import vols.models
+import vols.commands
+import vols.api_models
