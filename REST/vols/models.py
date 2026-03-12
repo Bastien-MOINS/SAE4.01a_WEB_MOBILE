@@ -30,6 +30,8 @@ def create_compagnie(nom_compagnie):
 
 def update_compagnie(id_compagnie, nom_compagnie):
     compagnie = get_compagnie(id_compagnie)
+    if compagnie is None:
+        return None
     compagnie.nom_compagnie = nom_compagnie
     db.session.commit()
     return compagnie

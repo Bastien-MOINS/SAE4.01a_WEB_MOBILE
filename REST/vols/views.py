@@ -46,7 +46,7 @@ class CompagnieItem(Resource):
         try:
             delete_compagnie(id)
         except CompagnieIdNotFoundException:
-            abort(404, f"Impossible de supprimer : la compagnie avec l'identifiant {id_compagnie} n'existe pas.")
+            abort(404, f"Impossible de supprimer : la compagnie avec l'identifiant {id} n'existe pas.")
         except CompagnieNotEmptyException:
             abort(400, "Il reste des vols dans la compagnie")
         return {'status': 'deleted'}, 200
