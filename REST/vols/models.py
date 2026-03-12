@@ -1,5 +1,6 @@
+from .extensions import db
+from .exceptions import CompagnieIdNotFoundException, CompagnieNotEmptyException
 from datetime import date, time, datetime
-from .app import db
 from sqlalchemy import func, or_, event, and_
 
 class Compagnie(db.Model):
@@ -17,6 +18,36 @@ class Compagnie(db.Model):
             'id_compagnie': self.id_compagnie,
             'nom_compagnie': self.nom_compagnie,
         }
+
+def get_all_compagnies():
+    return Compagnie.query.all()
+
+def get_compagnie(id_compagnie):
+    return Compagnie.query.get(id_compagnie)
+
+def create_compagnie(nom_compagnie):
+    compagnie = Compagnie(nom_compagnie)
+    db.session.add(compagnie)
+    db.session.commit()
+    return compagnie
+
+def update_compagnie(id_compagnie, nom_compagnie):
+    compagnie = get_compagnie(id_compagnie)
+    if compagnie is None:
+        return None
+    compagnie.nom_compagnie = nom_compagnie
+    db.session.commit()
+    return compagnie
+
+def delete_compagnie(id_compagnie):
+    compagnie = get_compagnie(id_compagnie)
+    if not compagnie:
+        raise CompagnieIdNotFoundException(f"Impossible de supprimer : la compagnie avec l'identifiant {id_compagnie} n'existe pas.")
+    if(len(compagnie.vols)!=0):#TODO Vérifier sur la liste de vols en cours ou programmés et non pas sur tout les vols
+        raise CompagnieNotEmptyException("Il reste des vols dans la compagnie")
+    db.session.delete(compagnie)
+    db.session.commit()
+
 
 class Aeroport(db.Model):
     __tablename__ = 'AEROPORT'

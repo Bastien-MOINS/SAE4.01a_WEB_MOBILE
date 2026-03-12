@@ -1,4 +1,3 @@
-from datetime import date, time
 from .app import app, db
 from .models import Compagnie, Aeroport, Vol, Terminal
 from datetime import date, timedelta, time
