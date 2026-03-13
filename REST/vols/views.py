@@ -103,6 +103,8 @@ class AeroportItem(Resource):
     @ns_aeroport.response(200, 'Aéroport supprimé avec succès')
     def delete(self, id):
         '''Supprime un aéroport via son identifiant'''
+        if Terminal.query.filter_by(numero_aeroport=id).first():
+            abort(400, "Impossible de supprimer cet aéroport il y a encore des terminaux.")
         if not delete_aeroport(id):
             abort(404, f"Impossible de supprimer : l'aéroport avec l'identifiant {id} n'existe pas.")
         return {'status': 'deleted'}, 200
@@ -236,12 +238,46 @@ class VolCollection(Resource):
             abort(400, "La date d'arrivée doit être une chaîne de caractères.")
         if not data.get('heure_arrivee') or not isinstance(data.get('heure_arrivee'), str):
             abort(400, "L'heure d'arrivée doit être une chaîne de caractères.")
-        if data.get('id_compagnie') is None or not isinstance(data.get('id_compagnie'), int): # TODO : Vérifier que id compagnie existe
+        if data.get('id_compagnie') is None or not isinstance(data.get('id_compagnie'), int):
             abort(400, "L'id de compagnie doit être un entier.")
         if data.get('numero_aeroport_dep') is None or not isinstance(data.get('numero_aeroport_dep'), int):
             abort(400, "Le numéro de l'aéroport de départ doit être un entier.")
         if data.get('numero_aeroport_arr') is None or not isinstance(data.get('numero_aeroport_arr'), int):
             abort(400, "Le numéro de l'aéroport d'arrivé doit être un entier.")
+
+        id_terminal_dep = data.get('id_terminal_dep')
+        if id_terminal_dep is not None and not isinstance(id_terminal_dep, int):
+            abort(400, "L'id du terminal de départ doit être un entier.")
+            
+        id_terminal_arr = data.get('id_terminal_arr')
+        if id_terminal_arr is not None and not isinstance(id_terminal_arr, int):
+            abort(400, "L'id du terminal d'arrivée doit être un entier.")
+
+        compagnie = Compagnie.query.get(data.get('id_compagnie'))
+        if not compagnie:
+            abort(404, "La compagnie choisie n'existe pas.")
+
+        aero_dep = Aeroport.query.get(data.get('numero_aeroport_dep'))
+        if not aero_dep:
+            abort(404, "L'aéroport de départ choisi n'existe pas.")
+
+        aero_arr = Aeroport.query.get(data.get('numero_aeroport_arr'))
+        if not aero_arr:
+            abort(404, "L'aéroport d'arrivée choisi n'existe pas.")
+
+        if id_terminal_dep is not None:
+            term_dep = Terminal.query.get(id_terminal_dep)
+            if not term_dep:
+                abort(404, "Le terminal de départ choisi n'existe pas.")
+            if term_dep.numero_aeroport != data.get('numero_aeroport_dep'):
+                abort(400, "Le terminal de départ n'appartient pas à l'aéroport de départ choisi.")
+
+        if id_terminal_arr is not None:
+            term_arr = Terminal.query.get(id_terminal_arr)
+            if not term_arr:
+                abort(404, "Le terminal d'arrivée choisi n'existe pas.")
+            if term_arr.numero_aeroport != data.get('numero_aeroport_arr'):
+                abort(400, "Le terminal d'arrivée n'appartient pas à l'aéroport d'arrivée choisi.")
 
         return create_vol(
             date_debut=data.get('date_debut'), 
@@ -250,7 +286,9 @@ class VolCollection(Resource):
             heure_arrivee=data.get('heure_arrivee'), 
             id_compagnie=data.get('id_compagnie'), 
             numero_aeroport_dep=data.get('numero_aeroport_dep'), 
-            numero_aeroport_arr=data.get('numero_aeroport_arr')
+            numero_aeroport_arr=data.get('numero_aeroport_arr'),
+            id_terminal_dep=id_terminal_dep,
+            id_terminal_arr=id_terminal_arr
         ), 201
 
 @ns_vol.route('/<int:numero_vol>')
@@ -285,12 +323,54 @@ class VolItem(Resource):
             abort(400, "La date d'arrivée doit être une chaîne de caractères.")
         if 'heure_arrivee' in data and not isinstance(data.get('heure_arrivee'), str):
             abort(400, "L'heure d'arrivée doit être une chaîne de caractères.")
-        if 'id_compagnie' in data and not isinstance(data.get('id_compagnie'), int):
+        id_compagnie = data.get('id_compagnie')
+        if 'id_compagnie' in data and not isinstance(id_compagnie, int):
             abort(400, "L'id de compagnie doit être un entier.")
-        if 'numero_aeroport_dep' in data and not isinstance(data.get('numero_aeroport_dep'), int):
+        
+        numero_aeroport_dep = data.get('numero_aeroport_dep')
+        if 'numero_aeroport_dep' in data and not isinstance(numero_aeroport_dep, int):
             abort(400, "Le numéro de l'aéroport de départ doit être un entier.")
-        if 'numero_aeroport_arr' in data and not isinstance(data.get('numero_aeroport_arr'), int):
+            
+        numero_aeroport_arr = data.get('numero_aeroport_arr')
+        if 'numero_aeroport_arr' in data and not isinstance(numero_aeroport_arr, int):
             abort(400, "Le numéro de l'aéroport d'arrivé doit être un entier.")
+
+        id_terminal_dep = data.get('id_terminal_dep')
+        if 'id_terminal_dep' in data and id_terminal_dep is not None and not isinstance(id_terminal_dep, int):
+            abort(400, "L'id du terminal de départ doit être un entier.")
+            
+        id_terminal_arr = data.get('id_terminal_arr')
+        if 'id_terminal_arr' in data and id_terminal_arr is not None and not isinstance(id_terminal_arr, int):
+            abort(400, "L'id du terminal d'arrivée doit être un entier.")
+
+        if id_compagnie is not None:
+            compagnie = Compagnie.query.get(id_compagnie)
+            if not compagnie:
+                abort(404, "La compagnie choisie n'existe pas.")
+
+        if numero_aeroport_dep is not None:
+            aero_dep = Aeroport.query.get(numero_aeroport_dep)
+            if not aero_dep:
+                abort(404, "L'aéroport de départ choisi n'existe pas.")
+
+        if numero_aeroport_arr is not None:
+            aero_arr = Aeroport.query.get(numero_aeroport_arr)
+            if not aero_arr:
+                abort(404, "L'aéroport d'arrivée choisi n'existe pas.")
+
+        if id_terminal_dep is not None:
+            term_dep = Terminal.query.get(id_terminal_dep)
+            if not term_dep:
+                abort(404, "Le terminal de départ choisi n'existe pas.")
+            if numero_aeroport_dep is not None and term_dep.numero_aeroport != numero_aeroport_dep:
+                abort(400, "Le terminal de départ n'appartient pas à l'aéroport de départ choisi.")
+
+        if id_terminal_arr is not None:
+            term_arr = Terminal.query.get(id_terminal_arr)
+            if not term_arr:
+                abort(404, "Le terminal d'arrivée choisi n'existe pas.")
+            if numero_aeroport_arr is not None and term_arr.numero_aeroport != numero_aeroport_arr:
+                abort(400, "Le terminal d'arrivée n'appartient pas à l'aéroport d'arrivée choisi.")
 
         vol = update_vol(
             numero_vol=numero_vol,
@@ -298,9 +378,11 @@ class VolItem(Resource):
             heure_debut=data.get('heure_debut'),
             date_arrivee=data.get('date_arrivee'),
             heure_arrivee=data.get('heure_arrivee'),
-            id_compagnie=data.get('id_compagnie'),
-            numero_aeroport_dep=data.get('numero_aeroport_dep'),
-            numero_aeroport_arr=data.get('numero_aeroport_arr'),
+            id_compagnie=id_compagnie,
+            numero_aeroport_dep=numero_aeroport_dep,
+            numero_aeroport_arr=numero_aeroport_arr,
+            id_terminal_dep=id_terminal_dep,
+            id_terminal_arr=id_terminal_arr
         )
         if not vol:
             abort(404, f"Impossible de modifier : le vol avec l'identifiant {numero_vol} n'existe pas.")

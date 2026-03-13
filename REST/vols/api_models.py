@@ -8,7 +8,9 @@ vol_model = api.model('Vol', {
     'heure_arrivee': fields.String,
     'id_compagnie': fields.Integer,
     'numero_aeroport_dep': fields.Integer,
-    'numero_aeroport_arr': fields.Integer
+    'id_terminal_dep': fields.Integer,
+    'numero_aeroport_arr': fields.Integer,
+    'id_terminal_arr': fields.Integer
 })
 
 vol_input_model = api.model('VolInput', {
@@ -18,7 +20,9 @@ vol_input_model = api.model('VolInput', {
     'heure_arrivee': fields.String(required=True),
     'id_compagnie': fields.Integer(required=True),
     'numero_aeroport_dep': fields.Integer(required=True),
-    'numero_aeroport_arr': fields.Integer(required=True)
+    'id_terminal_dep': fields.Integer(required=False),
+    'numero_aeroport_arr': fields.Integer(required=True),
+    'id_terminal_arr': fields.Integer(required=False)
 })
 compagnie_model = api.model('Compagnie', {
     'id_compagnie': fields.Integer,
