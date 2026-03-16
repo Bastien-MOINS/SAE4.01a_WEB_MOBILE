@@ -1,3 +1,5 @@
+import { CompagnieAPI } from "../api/compagnieapi.js";
+
 export class CompagnieSubViewApp {
     constructor(containerId) {
         this.container = document.getElementById(containerId);
@@ -5,7 +7,8 @@ export class CompagnieSubViewApp {
         // L'État central de l'application (State)
         this.state = {
             compagnies: [],
-            idCompagnie: null // si null on get ou post, sinon on put ou delete
+            idCompagnie: null, // si null post, sinon put ou delete
+            isDeleting: false // si false put, sinon delete
         };
 
         // Initialisation de l'application
@@ -14,10 +17,12 @@ export class CompagnieSubViewApp {
 
     async init() {
         await this.loadCompagnies();
-        // Une fois les données chargées, on dessine l'UI
-        this.renderGetCompagnie();
+        // Une fois les données chargées, on met à jour l'UI dans la div route
+        if (this.container) {
+             this.container.innerHTML = this.renderGetCompagnie();
+        }
         // On écoute les événements globaux
-        this.bindEvents();
+        // this.bindEvents();
     }
 
     async loadCompagnies() {
@@ -30,10 +35,12 @@ export class CompagnieSubViewApp {
     }
 
 
-    async renderGetCompagnie() {
+    renderGetCompagnie() {
+        console.log("Ajout du render GET-COMPAGNIE"); //debug
         this.state.idCompagnie = null;
         let rows = '';
-        for (const compagnie of this.state.compagnies) {
+        this.state.compagnies.forEach(compagnie => {
+            console.log(compagnie.nom_compagnie);
             rows += `
                 <tr class="">
                     <td class="">${compagnie.nom_compagnie}</td>
@@ -43,7 +50,7 @@ export class CompagnieSubViewApp {
                     </td>
                 </tr>
             `;
-        }
+        });
         return `
         <div class="">
             <div class="">
@@ -66,14 +73,23 @@ export class CompagnieSubViewApp {
     }
 
     static async renderPutPostCompagnie(){
-        const Compagnie = this.state.idCompagnie || { nom: '' };
+        console.log("Ajout du render PUT-OR-POST-COMPAGNIE"); //debug
+        const http = "Ajouter Une Compagnie";
+        const compagnie = {nom: ''};
+        const idCompagnie = this.state.idCompagnie;
+        if (idCompagnie){
+            const json = CompagnieAPI.getCompagnies();
+            compagnie[nom] = json[idCompagnie].nom_compagnie;
+            http = "Modifier Une Compagnie";
+        }
+
         return `
             <div class="">
                 <div class="">
                     <div class="">
                         <div class="">
                             <i class="fa-solid fa-circle-plus"></i>
-                            <h3 class="">Ajouter Une Compagnie</h3>
+                            <h3 class="">${http}</h3>
                         </div>
                         <button class="">
                             <i class="fas fa-times"></i>
@@ -103,35 +119,25 @@ export class CompagnieSubViewApp {
     // --- GESTION DES ÉVÉNEMENTS (Délégation d'événements) ---
     // Au lieu de mettre des addEventListener de partout qui se perdent quand le HTML est recréé (render),
     // On met un seul écouteur sur le conteneur principal.
-
     bindEvents() {
         this.container.addEventListener('click', async (e) => {
-            // 1. Clic sur "POST"
-            if (e.target.id === 'btn-new') {
+            // 1. Clic sur "Compagnie"
+            if (e.target.id === 'btn-get') {
                 this.setState({ currentTask: null, isCreating: true });
             }
 
-            // 2. Clic sur une tâche de la liste
-            if (e.target.closest('.task-item')) {
-                const li = e.target.closest('.task-item');
-                const id = parseInt(li.dataset.id, 10);
-                const task = this.state.tasks.find(t => t.id === id);
-                if (task) {
-                    this.setState({ currentTask: task, isCreating: false });
-                }
+            // 2. Clic sur "Vols"
+            if (e.target.id === 'btn-post') {
+                this.setState({ currentTask: null, isCreating: true });
             }
 
-            // 3. Clic sur "Supprimer la Compagnie"
-            if (e.target.id === 'btn-del' && this.state.currentTask) {
-                if (confirm('Voulez-vous supprimer cette tâche ?')) {
-                    await TodoAPI.deleteTask(this.state.currentTask.id);
-                    await this.loadTasks();
-                    this.setState({ currentTask: null });
-                }
+            // 3. Clic sur "Terminaux"
+            if (e.target.id === 'btn-put') {
+                this.setState({ currentTask: null, isCreating: true });
             }
 
             // 4. Clic sur le bouton "Modifier une Compagnie"
-            if (e.target.id === 'btn-save') {
+            if (e.target.id === 'btn-delete') {
                 const title = document.getElementById('input-title').value;
                 const description = document.getElementById('input-desc').value;
                 const done = document.getElementById('input-done').checked;
@@ -151,5 +157,5 @@ export class CompagnieSubViewApp {
                 this.setState({ isCreating: false, currentTask: null });
             }
         });
-    }   
+    } 
 }
