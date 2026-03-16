@@ -35,7 +35,7 @@ class TodoApp {
 
     // --- MISE À JOUR DE L'ÉTAT ET RÉACTUALISATION ---
     
-    // Fonction magique d'une SPA : quand l'état change, on redessine l'interface
+    // quand l'état change, on redessine l'interface
     setState(newState) {
         this.state = { ...this.state, ...newState };
         this.render();
