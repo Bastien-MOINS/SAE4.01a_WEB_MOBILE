@@ -1,6 +1,9 @@
+import 'package:app_mobile/models/api.dart';
 import 'package:app_mobile/screens/flight_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'airport.dart';
+import 'api.dart';
 
 class Flight {
   int numeroVol;
@@ -11,6 +14,8 @@ class Flight {
   int idTerminalDepart;
   int numeroAeroportArrivee;
   int idTerminalArrivee;
+  double latitude;
+  double longitude;
 
   Flight({
     required this.numeroVol,
@@ -23,6 +28,8 @@ class Flight {
     required this.idTerminalDepart,
     required this.numeroAeroportArrivee,
     required this.idTerminalArrivee,
+    required this.latitude,
+    required this.longitude
   }) {
     dateHeureDepart = DateTime.parse('$dateDepart $heureDepart');
     dateHeureArrivee = DateTime.parse('$dateArrivee $heureArrivee');
@@ -40,20 +47,26 @@ class Flight {
       idTerminalDepart: json['id_terminal_dep'],
       numeroAeroportArrivee: json['numero_aeroport_arr'],
       idTerminalArrivee: json['id_terminal_arr'],
+      latitude: json['latitude'],
+      longitude: json['longitude']
     );
   }
 
   Widget toWidget(BuildContext context){
+
     return ListTile(
       title: Text("Vol N°$numeroVol"),
       trailing: Text('trailing'),
       subtitle: Text('sous titre'),
       isThreeLine: true,
-      onTap: () {
+      onTap: () async {
+        Api api = Api();
+        Airport Airportdepart = await api.getAirport(numeroAeroportDepart);
+        Airport Airportarrivee = await api.getAirport(numeroAeroportArrivee);
         Navigator.push(
           context,
           MaterialPageRoute<void>(
-              builder: (context) => FlightScreen(flight: this)
+              builder: (context) => FlightScreen(flight: this, departAirport: Airportdepart, arriveeAirport: Airportarrivee)
           )
         );
       },

@@ -56,18 +56,24 @@ class Aeroport(db.Model):
     nom_aeroport = db.Column(db.String(38))
     ville = db.Column(db.String(38))
     pays = db.Column(db.String(38))
+    latitude = db.Column(db.Float)
+    longitude = db.Column(db.Float)
 
-    def __init__(self, nom_aeroport, ville, pays):
+    def __init__(self, nom_aeroport, ville, pays, latitude, longitude):
         self.nom_aeroport = nom_aeroport
         self.ville = ville
         self.pays = pays
+        self.latitude = latitude
+        self.longitude = longitude
 
     def to_json(self):
         return {
             'numero_aeroport': self.numero_aeroport,
             'nom_aeroport': self.nom_aeroport,
             'ville': self.ville,
-            'pays': self.pays
+            'pays': self.pays,
+            'latitude': self.latitude,
+            'longitude': self.longitude
         }
 
 def get_all_aeroports():
@@ -76,13 +82,13 @@ def get_all_aeroports():
 def get_aeroport_by_id(id):
     return Aeroport.query.get(id)
 
-def create_aeroport(nom_aeroport, ville, pays):
-    new_aeroport = Aeroport(nom_aeroport, ville, pays)
+def create_aeroport(nom_aeroport, ville, pays, latitude, longitude):
+    new_aeroport = Aeroport(nom_aeroport, ville, pays, latitude, longitude)
     db.session.add(new_aeroport)
     db.session.commit()
     return new_aeroport
 
-def update_aeroport(id, nom_aeroport=None, ville=None, pays=None):
+def update_aeroport(id, nom_aeroport=None, ville=None, pays=None, latitude=None, longitude=None):
     aeroport = Aeroport.query.get(id)
     if not aeroport:
         return None
@@ -92,6 +98,10 @@ def update_aeroport(id, nom_aeroport=None, ville=None, pays=None):
         aeroport.ville = ville
     if pays is not None:
         aeroport.pays = pays
+    if latitude is not None:
+        aeroport.latitude = latitude
+    if longitude is not None:
+        aeroport.longitude = longitude
     db.session.commit()
     return aeroport
 

@@ -3,12 +3,15 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 
 class Map extends StatelessWidget {
+  LatLng posDepart;
+  LatLng posArrivee;
 
+  Map({required this.posDepart, required this.posArrivee});
   @override
   Widget build(BuildContext context) {
     return FlutterMap(
       options: MapOptions(
-        initialCenter: LatLng(51.509364, -0.128928),
+        initialCenter: LatLngBounds.fromPoints([posDepart, posArrivee]).center,
         initialZoom: 9.2,
       ),
       children: [

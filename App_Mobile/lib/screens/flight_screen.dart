@@ -1,12 +1,16 @@
+import 'package:app_mobile/models/airport.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import '../models/flight.dart';
 import 'map.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:latlong2/latlong.dart';
 
 class FlightScreen extends StatelessWidget{
-  const FlightScreen({super.key, required this.flight});
+  const FlightScreen({super.key, required this.flight, required this.departAirport, required this.arriveeAirport});
   final Flight flight;
+  final Airport departAirport;
+  final Airport arriveeAirport;
   @override
   Widget build(BuildContext context) {
       return Scaffold(
@@ -21,10 +25,14 @@ class FlightScreen extends StatelessWidget{
                 child: Column(
                   children: [
                     Text(flight.numeroVol.toString()),
-                    SizedBox(height: 300, child: Map()),
+                    SizedBox(height: 300, child: Map(
+                      posDepart: LatLng(departAirport.latitude, departAirport.longitude),
+                      posArrivee: LatLng(arriveeAirport.latitude, arriveeAirport.longitude),
+                    )),
                   ],
                 ),
-              )
+              ),
+              Text("")
             ],
           ),
         ),

@@ -17,12 +17,12 @@ def syncdb():
     db.session.commit()
     
     # --- 2. Créer les aéroports ---
-    cdg = Aeroport('Charles de Gaulle', 'Paris', 'France')
-    orly = Aeroport('Orly', 'Paris', 'France')
-    lyon = Aeroport('Lyon Saint-Exupéry', 'Lyon', 'France')
-    nice = Aeroport('Nice Côte d\'Azur', 'Nice', 'France')
-    frankfurt = Aeroport('Frankfurt', 'Frankfurt', 'Allemagne')
-    berlin = Aeroport('Berlin Brandenburg', 'Berlin', 'Allemagne')
+    cdg = Aeroport('Charles de Gaulle', 'Paris', 'France', 49.0097, 2.5479)
+    orly = Aeroport('Orly', 'Paris', 'France', 48.7262, 2.3652)
+    lyon = Aeroport('Lyon Saint-Exupéry', 'Lyon', 'France', 45.7256, 5.0811)
+    nice = Aeroport('Nice Côte d\'Azur', 'Nice', 'France', 43.6653, 7.2150)
+    frankfurt = Aeroport('Frankfurt', 'Frankfurt', 'Allemagne', 50.0333, 8.5706)
+    berlin = Aeroport('Berlin Brandenburg', 'Berlin', 'Allemagne', 52.3667, 13.5033)
     
     db.session.add_all([cdg, orly, lyon, nice, frankfurt, berlin])
     db.session.commit()

@@ -85,8 +85,12 @@ class AeroportCollection(Resource):
             abort(400, "La ville doit être une chaîne de caractères.")
         if not data.get('pays') or not isinstance(data.get('pays'), str):
             abort(400, "Le pays doit être une chaîne de caractères.")
+        if 'latitude' not in data or not isinstance(data.get('latitude'), (int, float)):
+            abort(400, "La latitude doit être un nombre.")
+        if 'longitude' not in data or not isinstance(data.get('longitude'), (int, float)):
+            abort(400, "La longitude doit être un nombre.")
 
-        return create_aeroport(nom_aeroport=data.get('nom_aeroport'), ville=data.get('ville'), pays=data.get('pays')), 201
+        return create_aeroport(nom_aeroport=data.get('nom_aeroport'), ville=data.get('ville'), pays=data.get('pays'), latitude=data.get('latitude'), longitude=data.get('longitude')), 201
 
 @ns_aeroport.route('/<int:id>')
 @ns_aeroport.response(404, 'Aéroport non trouvé')
@@ -120,7 +124,11 @@ class AeroportItem(Resource):
             abort(400, "La ville doit être une chaîne de caractères.")
         if 'pays' in data and not isinstance(data.get('pays'), str):
             abort(400, "Le pays doit être une chaîne de caractères.")
-        aeroport = update_aeroport(id=id, nom_aeroport=data.get('nom_aeroport'), ville=data.get('ville'), pays=data.get('pays'))
+        if 'latitude' in data and not isinstance(data.get('latitude'), (int, float)):
+            abort(400, "La latitude doit être un nombre.")
+        if 'longitude' in data and not isinstance(data.get('longitude'), (int, float)):
+            abort(400, "La longitude doit être un nombre.")
+        aeroport = update_aeroport(id=id, nom_aeroport=data.get('nom_aeroport'), ville=data.get('ville'), pays=data.get('pays'), latitude=data.get('latitude'), longitude=data.get('longitude'))
         if not aeroport:
             abort(404, f"Impossible de modifier : l'aéroport avec l'identifiant {id} n'existe pas.")
         return aeroport

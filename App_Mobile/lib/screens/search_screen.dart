@@ -28,7 +28,8 @@ class SearchScreen extends StatelessWidget{
                   }
 
                   if (snapshot.hasError){
-                    return Center(child: Text("Une erreur est survenue !!! ¯\\_(ツ)_/¯ ${snapshot.data} "),);
+                    print("${snapshot.error}");
+                    return Center(child: Text("Erreur : ${snapshot.error}"),);
                   }
                   return Container();
                 },
