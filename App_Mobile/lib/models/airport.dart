@@ -19,11 +19,11 @@ class Airport {
 
   factory Airport.fromJson(dynamic json) {
     return Airport(
-        numeroAeroport: json['numero_vol'],
+        numeroAeroport: json['numero_aeroport'],
         nomAeroport: json['nom_aeroport'],
         ville: json['ville'],
-        latitude: json['latitude'],
-        longitude: json['longitude']
+        latitude: (json['latitude'] ?? 0.0).toDouble(),
+        longitude: (json['longitude']?? 0.0).toDouble()
     );
   }
 }

@@ -21,17 +21,21 @@ class FlightScreen extends StatelessWidget{
         body: SingleChildScrollView(
           child: Column(
             children: [
-              Card(
+              Center(child: Card(
                 child: Column(
                   children: [
                     Text(flight.numeroVol.toString()),
-                    SizedBox(height: 300, child: Map(
+                    SizedBox(height: 300, width: 400, child: Map(
                       posDepart: LatLng(departAirport.latitude, departAirport.longitude),
                       posArrivee: LatLng(arriveeAirport.latitude, arriveeAirport.longitude),
                     )),
+                    Text("depart lat ${departAirport.latitude}"),
+                    Text("depart long ${departAirport.longitude}"),
+                    Text("arrivee lat ${arriveeAirport.latitude}"),
+                    Text("arrivee long ${arriveeAirport.longitude}"),
                   ],
                 ),
-              ),
+              )),
               Text("")
             ],
           ),

@@ -47,8 +47,8 @@ class Flight {
       idTerminalDepart: json['id_terminal_dep'],
       numeroAeroportArrivee: json['numero_aeroport_arr'],
       idTerminalArrivee: json['id_terminal_arr'],
-      latitude: json['latitude'],
-      longitude: json['longitude']
+      latitude: (json['latitude'] ?? 0.0).toDouble(),
+      longitude: (json['longitude']?? 0.0).toDouble()
     );
   }
 
