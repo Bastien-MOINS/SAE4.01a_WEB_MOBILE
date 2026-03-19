@@ -17,6 +17,20 @@ export class CompagnieAPI {
         }
     }
 
+    static async getCompagnieById(idCompagnie) {
+        try{
+            const response = await fetch(this.BASE_URL + `${idCompagnie}`)
+            if (!response.ok) throw new Error("Erreur réseau");
+
+            const json = await response.json();
+            console.log(json[0]);
+            return json;
+        } catch(error) {
+            console.error(`Erreur lors de la récupération de la compagnie (id: ${idCompagnie})`, error);
+            return [];
+        }
+    }
+
     static async createCompagnie(nomCompagnie) {
         try {
             const response = await fetch(this.BASE_URL, {
@@ -41,7 +55,7 @@ export class CompagnieAPI {
 
     static async modifyCompagnie(idCompagnie, nomCompagnie) {
         try {
-            const response = await fetch(this.BASE_URL + `/${idCompagnie}`, {
+            const response = await fetch(this.BASE_URL + `${idCompagnie}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json'
@@ -62,7 +76,7 @@ export class CompagnieAPI {
 
     static async deleteCompagnie(idCompagnie) {
         try{
-            const response = await fetch(this.BASE_URL + `/${idCompagnie}`, {
+            const response = await fetch(this.BASE_URL + `${idCompagnie}`, {
                 method: 'DELETE'
             });
             if (!response.ok) {

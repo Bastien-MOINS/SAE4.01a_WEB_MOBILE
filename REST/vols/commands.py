@@ -34,7 +34,7 @@ def syncdb():
     t_lyon = Terminal(numero_aeroport=lyon.numero_aeroport, nom_terminal="Terminal 1")
     t_orly = Terminal(numero_aeroport=orly.numero_aeroport, nom_terminal="Orly 4")
     t_nice = Terminal(numero_aeroport=nice.numero_aeroport, nom_terminal="Terminal 2")
-    t_frank = Terminal(numero_aeroport=frankfurt.numero_aeroport, nom_terminal="Terminal A")
+    t_frank = Terminal(numero_aeroport=freankfurt.numero_aeroport, nom_terminal="Terminal A")
     t_berlin = Terminal(numero_aeroport=berlin.numero_aeroport, nom_terminal="Main Hall")
 
     db.session.add_all([t1_cdg, t2_cdg, t_lyon, t_orly, t_nice, t_frank, t_berlin])
