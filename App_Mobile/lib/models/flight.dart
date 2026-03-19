@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'airport.dart';
 import 'api.dart';
+import 'package:intl/intl.dart';
 
 class Flight {
   int numeroVol;
@@ -51,6 +52,24 @@ class Flight {
       longitude: (json['longitude']?? 0.0).toDouble()
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'numero_vol': numeroVol,
+      'date_debut': DateFormat('yyyy-MM-dd').format(dateHeureDepart),
+      'heure_debut': DateFormat('HH:mm:ss').format(dateHeureDepart),
+      'date_arrivee': DateFormat('yyyy-MM-dd').format(dateHeureArrivee),
+      'heure_arrivee': DateFormat('HH:mm:ss').format(dateHeureArrivee),
+      'id_compagnie': idCompagnie,
+      'numero_aeroport_dep': numeroAeroportDepart,
+      'id_terminal_dep': idTerminalDepart,
+      'numero_aeroport_arr': numeroAeroportArrivee,
+      'id_terminal_arr': idTerminalArrivee,
+      'latitude': latitude,
+      'longitude': longitude,
+    };
+  }
+
 
   Widget toWidget(BuildContext context){
 

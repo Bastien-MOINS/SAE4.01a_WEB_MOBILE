@@ -2,6 +2,7 @@ import 'package:app_mobile/models/airport.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import '../models/flight.dart';
+import '../repositories/flight_repository.dart';
 import 'map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:latlong2/latlong.dart';
@@ -33,6 +34,17 @@ class FlightScreen extends StatelessWidget{
                     Text("depart long ${departAirport.longitude}"),
                     Text("arrivee lat ${arriveeAirport.latitude}"),
                     Text("arrivee long ${arriveeAirport.longitude}"),
+                    ElevatedButton(
+                        onPressed: () async {
+                          await FlightRepository().saveFlight(flight);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text("Vol réservé avec succès !"),
+                              backgroundColor: Colors.green,
+                            ),
+                          );
+                        },
+                        child: Text("Réserver"))
                   ],
                 ),
               )),
