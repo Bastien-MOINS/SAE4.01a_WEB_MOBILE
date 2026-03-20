@@ -250,6 +250,20 @@ def _parse_time(value):
 def get_all_vols():
     return Vol.query.all()
 
+def get_vols_filtered(ville_depart=None, ville_arrivee=None):
+    query = Vol.query
+    
+    if ville_depart:
+        query = query.join(Aeroport, Vol.numero_aeroport_dep == Aeroport.numero_aeroport) \
+                     .filter(Aeroport.ville.ilike(f'%{ville_depart}%'))
+                     
+    if ville_arrivee:
+        vols_arrivee = query.join(Aeroport, Vol.numero_aeroport_arr == Aeroport.numero_aeroport) \
+                            .filter(Aeroport.ville.ilike(f'%{ville_arrivee}%'))
+        return vols_arrivee.all()
+                     
+    return query.all()
+
 def get_vol_by_id(numero_vol):
     return Vol.query.get(numero_vol)
 

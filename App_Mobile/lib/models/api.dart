@@ -12,9 +12,20 @@ class Api {
       url = "10.0.2.2";
     }
   }
-  Future<List<Flight>> getFlights() async {
+  Future<List<Flight>> getFlights({String? villeDepart, String? villeArrivee}) async {
     _checkUrl();
-    final response = await http.get(Uri.parse("http://$url:5000/vol/"));
+    
+    Map<String, String> query = {};
+    if (villeDepart != null && villeDepart.isNotEmpty) {
+      query['villeDepart'] = villeDepart;
+    }
+    if (villeArrivee != null && villeArrivee.isNotEmpty) {
+      query['villeArrivee'] = villeArrivee;
+    }
+
+    Uri uri = Uri.http("$url:5000", "/vol/", query.isNotEmpty ? query : null);
+    
+    final response = await http.get(uri);
     if (response.statusCode == 200){
       List<dynamic> json = jsonDecode(response.body);
       final _flights = <Flight>[];
@@ -26,7 +37,34 @@ class Api {
       throw Exception('Failed to load flights');
     }
   }
+  static Map<int, dynamic>? _airportsMap;
+  static Map<int, dynamic>? _compagniesMap;
 
+  Future<Map<int, dynamic>> getAirportsMap() async {
+    if (_airportsMap != null) return _airportsMap!;
+    _checkUrl();
+    final response = await http.get(Uri.parse("http://$url:5000/aeroports"));
+    if (response.statusCode == 200){
+      List<dynamic> json = jsonDecode(response.body);
+      _airportsMap = {for (var a in json) a['numero_aeroport']: a};
+      return _airportsMap!;
+    }else{
+      throw Exception('Failed to load airports json');
+    }
+  }
+
+  Future<Map<int, dynamic>> getCompagniesMap() async {
+    if (_compagniesMap != null) return _compagniesMap!;
+    _checkUrl();
+    final response = await http.get(Uri.parse("http://$url:5000/compagnies"));
+    if (response.statusCode == 200) {
+      List<dynamic> json = jsonDecode(response.body);
+      _compagniesMap = {for (var c in json) c['id_compagnie']: c};
+      return _compagniesMap!;
+    } else {
+      throw Exception('Failed to load compagnies json');
+    }
+  }
   Future<Airport> getAirport(int index) async {
     _checkUrl();
     final response = await http.get(Uri.parse("http://$url:5000/aeroports/$index"));

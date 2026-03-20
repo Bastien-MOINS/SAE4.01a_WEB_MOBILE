@@ -39,7 +39,7 @@ class FlightScreen extends StatelessWidget{
                           await FlightRepository().saveFlight(flight);
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
-                              content: Text("Vol réservé avec succès !"),
+                              content: Text("Vol réservé avec succès"),
                               backgroundColor: Colors.green,
                             ),
                           );
@@ -48,7 +48,6 @@ class FlightScreen extends StatelessWidget{
                   ],
                 ),
               )),
-              Text("")
             ],
           ),
         ),

@@ -2,10 +2,23 @@ import 'package:app_mobile/repositories/flight_repository.dart';
 import 'package:flutter/material.dart';
 
 import '../models/flight.dart';
+import '../models/api.dart';
 
 class HomeScreen extends StatelessWidget{
   FlightRepository flightRepository = FlightRepository();
-  late final Future<List<Flight>> _flights = flightRepository.getSavedFlights();
+  
+  Future<Map<String, dynamic>> _loadData() async {
+    Api api = Api();
+    final flights = await flightRepository.getSavedFlights();
+    final airports = await api.getAirportsMap();
+    final compagnies = await api.getCompagniesMap();
+    return {
+      'flights': flights,
+      'airports': airports,
+      'compagnies': compagnies,
+    };
+  }
+
   @override
   Widget build(BuildContext context) {
 
@@ -13,19 +26,21 @@ class HomeScreen extends StatelessWidget{
         body: Column(
           children: [
             Expanded(
-              child: FutureBuilder<List<Flight>>(
-                future: _flights,
+              child: FutureBuilder<Map<String, dynamic>>(
+                future: _loadData(),
                 builder: (context, snapshot){
                   if(snapshot.connectionState == ConnectionState.waiting){
-                    return CircularProgressIndicator();
+                    return Center(child: CircularProgressIndicator());
                   }
-                  if(snapshot.hasData && snapshot.data!.isNotEmpty){
-                    final flight = snapshot.data?[0];
+                  if(snapshot.hasData && (snapshot.data!['flights']).isNotEmpty){
+                    final flights = snapshot.data!['flights'];
+                    final airports = snapshot.data!['airports'];
+                    final compagnies = snapshot.data!['compagnies'];
                     return ListView.builder(
                         padding: const EdgeInsets.all(8),
-                        itemCount: snapshot.data?.length??0,
+                        itemCount: flights.length,
                         itemBuilder: (context, index){
-                          return snapshot.data![index].toWidget(context);
+                          return flights[index].toWidget(context, airports, compagnies);
                         }
                     );
                   }

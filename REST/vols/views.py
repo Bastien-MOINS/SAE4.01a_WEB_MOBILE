@@ -223,12 +223,21 @@ class TerminalItem(Resource):
     
 ns_vol = api.namespace('vol')
 
+parser_vols = api.parser()
+parser_vols.add_argument('villeDepart', type=str, location='args', help='Nom de la ville de départ')
+parser_vols.add_argument('villeArrivee', type=str, location='args', help='Nom de la ville d\'arrivée')
+
 @ns_vol.route('/')
 class VolCollection(Resource):
-    @ns_vol.doc('list_vols')
+    @ns_vol.doc('list_vols', parser=parser_vols)
     @ns_vol.marshal_list_with(vol_model)
     def get(self):
         '''Liste tous les vols'''
+        ville_depart = request.args.get('villeDepart', type=str)
+        ville_arrivee = request.args.get('villeArrivee', type=str)
+        
+        if ville_depart is not None or ville_arrivee is not None:
+            return get_vols_filtered(ville_depart, ville_arrivee)
         return get_all_vols()
 
     @ns_vol.doc('create_vol')

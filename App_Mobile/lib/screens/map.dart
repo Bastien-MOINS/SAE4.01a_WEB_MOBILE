@@ -66,13 +66,7 @@ class Map extends StatelessWidget {
             ),Marker(
               point: posDepart,
               child: const Icon(Icons.circle, color: Colors.black, size: 12,),
-            ),Marker(
-                point: LatLng(posArrivee.latitude+1, posArrivee.longitude),
-                child: const Card(
-                  child: Center(child: Text("fr Paris CDG"),),
-                )
-            )
-
+            ),
           ],
         ),
       ],

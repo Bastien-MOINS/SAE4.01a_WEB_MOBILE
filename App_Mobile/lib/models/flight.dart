@@ -38,18 +38,18 @@ class Flight {
 
   factory Flight.fromJson(Map<String, dynamic> json) {
     return Flight(
-      numeroVol: json['numero_vol'],
-      dateDepart: json['date_debut'].toString(),
-      heureDepart: json['heure_debut'].toString(),
-      dateArrivee: json['date_arrivee'].toString(),
-      heureArrivee: json['heure_arrivee'].toString(),
-      idCompagnie: json['id_compagnie'],
-      numeroAeroportDepart: json['numero_aeroport_dep'],
-      idTerminalDepart: json['id_terminal_dep'],
-      numeroAeroportArrivee: json['numero_aeroport_arr'],
-      idTerminalArrivee: json['id_terminal_arr'],
-      latitude: (json['latitude'] ?? 0.0).toDouble(),
-      longitude: (json['longitude']?? 0.0).toDouble()
+        numeroVol: json['numero_vol'],
+        dateDepart: json['date_debut'].toString(),
+        heureDepart: json['heure_debut'].toString(),
+        dateArrivee: json['date_arrivee'].toString(),
+        heureArrivee: json['heure_arrivee'].toString(),
+        idCompagnie: json['id_compagnie'],
+        numeroAeroportDepart: json['numero_aeroport_dep'],
+        idTerminalDepart: json['id_terminal_dep'],
+        numeroAeroportArrivee: json['numero_aeroport_arr'],
+        idTerminalArrivee: json['id_terminal_arr'],
+        latitude: (json['latitude'] ?? 0.0).toDouble(),
+        longitude: (json['longitude'] ?? 0.0).toDouble()
     );
   }
 
@@ -70,25 +70,85 @@ class Flight {
     };
   }
 
+  Widget toWidget(BuildContext context, Map<int, dynamic> airports, Map<int, dynamic> compagnies) {
+    final depart = airports[numeroAeroportDepart];
+    final arrivee = airports[numeroAeroportArrivee];
+    final compagnie = compagnies[idCompagnie];
 
-  Widget toWidget(BuildContext context){
-
-    return ListTile(
-      title: Text("Vol N°$numeroVol"),
-      trailing: Text('trailing'),
-      subtitle: Text('sous titre'),
-      isThreeLine: true,
-      onTap: () async {
-        Api api = Api();
-        Airport Airportdepart = await api.getAirport(numeroAeroportDepart);
-        Airport Airportarrivee = await api.getAirport(numeroAeroportArrivee);
-        Navigator.push(
-          context,
-          MaterialPageRoute<void>(
-              builder: (context) => FlightScreen(flight: this, departAirport: Airportdepart, arriveeAirport: Airportarrivee)
-          )
-        );
-      },
-    );
-  }
-}
+    return GestureDetector(
+        onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => FlightScreen(
+                  flight: this,
+                  departAirport: Airport.fromJson(depart),
+                  arriveeAirport: Airport.fromJson(arrivee),
+                ),
+              ),
+            );
+          },
+        child: Card(
+          elevation: 4,
+          margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(15)),
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    const Icon(Icons.flight_takeoff, color: Colors.blue),
+                    const SizedBox(width: 8),
+                    Text(
+                      compagnie?['nom_compagnie'] ?? "Compagnie $idCompagnie",
+                      style: const TextStyle(
+                          fontWeight: FontWeight.bold, color: Colors.blueGrey),
+                    ),
+                  ],
+                ),
+                const Divider(),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text("DÉPART", style: TextStyle(
+                              color: Colors.grey, fontSize: 10)),
+                          Text(depart?['nom_aeroport'] ??
+                              "ID $numeroAeroportDepart",
+                              style: const TextStyle(
+                                  fontWeight: FontWeight.bold)),
+                          Text(depart?['ville'] ?? "", style: const TextStyle(
+                              color: Colors.blueGrey)),
+                        ],
+                      ),
+                    ),
+                    const Icon(
+                        Icons.arrow_forward_ios, size: 16, color: Colors.grey),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          const Text("ARRIVÉE", style: TextStyle(
+                              color: Colors.grey, fontSize: 10)),
+                          Text(arrivee?['nom_aeroport'] ??
+                              "ID $numeroAeroportArrivee",
+                              style: const TextStyle(
+                                  fontWeight: FontWeight.bold)),
+                          Text(arrivee?['ville'] ?? "", style: const TextStyle(
+                              color: Colors.blueGrey)),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ));
+      }
+      }
