@@ -8,8 +8,7 @@ export class CompagnieAPI {
             const response = await fetch(this.BASE_URL);
             if (!response.ok) throw new Error("Erreur réseau");
             
-            const json = await response.json(); 
-            console.log(json[0]);
+            const json = await response.json();
             return json;
         } catch (error) {
             console.error("Erreur lors de la récupération des compagnies:", error);
@@ -23,7 +22,6 @@ export class CompagnieAPI {
             if (!response.ok) throw new Error("Erreur réseau");
 
             const json = await response.json();
-            console.log(json[0]);
             return json;
         } catch(error) {
             console.error(`Erreur lors de la récupération de la compagnie (id: ${idCompagnie})`, error);

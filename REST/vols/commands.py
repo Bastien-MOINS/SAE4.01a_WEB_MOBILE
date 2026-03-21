@@ -12,8 +12,18 @@ def syncdb():
     air_france = Compagnie('Air France')
     lufthansa = Compagnie('Lufthansa')
     ryanair = Compagnie('Ryanair')
+    trvhre = Compagnie('Ryanair')
+    ecgwrgec = Compagnie('Ryanair')
+    ccgwcg = Compagnie('Ryanair')
+    wcrgvwwv = Compagnie('Ryanair')
+    cvgrgvw = Compagnie('Ryanair')
+    jbyrbjyj = Compagnie('Ryanair')
+    bjtvwevh = Compagnie('Ryanair')
+    jybtb = Compagnie('Ryanair')
+    vhgwvh = Compagnie('Ryanair')
+    rytyyt = Compagnie('Ryanair')
     
-    db.session.add_all([air_france, lufthansa, ryanair])
+    db.session.add_all([air_france, lufthansa, ryanair, trvhre, ecgwrgec, ccgwcg, wcrgvwwv, cvgrgvw, jbyrbjyj, bjtvwevh, jybtb, vhgwvh, rytyyt])
     db.session.commit()
     
     # --- 2. Créer les aéroports ---
@@ -34,7 +44,7 @@ def syncdb():
     t_lyon = Terminal(numero_aeroport=lyon.numero_aeroport, nom_terminal="Terminal 1")
     t_orly = Terminal(numero_aeroport=orly.numero_aeroport, nom_terminal="Orly 4")
     t_nice = Terminal(numero_aeroport=nice.numero_aeroport, nom_terminal="Terminal 2")
-    t_frank = Terminal(numero_aeroport=freankfurt.numero_aeroport, nom_terminal="Terminal A")
+    t_frank = Terminal(numero_aeroport=frankfurt.numero_aeroport, nom_terminal="Terminal A")
     t_berlin = Terminal(numero_aeroport=berlin.numero_aeroport, nom_terminal="Main Hall")
 
     db.session.add_all([t1_cdg, t2_cdg, t_lyon, t_orly, t_nice, t_frank, t_berlin])
