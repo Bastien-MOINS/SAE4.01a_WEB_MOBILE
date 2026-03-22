@@ -3,7 +3,7 @@ from .models import *
 from flask_restx import Resource, Namespace, fields
 from datetime import datetime
 from .app import app, db, api
-from .api_models import aeroport_model, aeroport_input_model, terminal_model, terminal_input_model, vol_model, vol_input_model, compagnie_input_model, compagnie_model
+from .api_models import aeroport_model, aeroport_input_model, terminal_model, terminal_input_model, vol_model, vol_input_model, compagnie_input_model, compagnie_model, vol_search_model
 
 ns_compagnie = api.namespace('compagnies')
 
@@ -226,19 +226,29 @@ ns_vol = api.namespace('vol')
 parser_vols = api.parser()
 parser_vols.add_argument('villeDepart', type=str, location='args', help='Nom de la ville de départ')
 parser_vols.add_argument('villeArrivee', type=str, location='args', help='Nom de la ville d\'arrivée')
+parser_vols.add_argument('DateDepart', type=str, location='args', help='Date de départ pour l\'aller')
+parser_vols.add_argument('DateRetour', type=str, location='args', help='Date de départ pour le retour')
 
 @ns_vol.route('/')
 class VolCollection(Resource):
     @ns_vol.doc('list_vols', parser=parser_vols)
-    @ns_vol.marshal_list_with(vol_model)
     def get(self):
-        '''Liste tous les vols'''
+        '''Recherche de vols Aller/Retour ou liste tous les vols'''
         ville_depart = request.args.get('villeDepart', type=str)
         ville_arrivee = request.args.get('villeArrivee', type=str)
+        date_depart = request.args.get('DateDepart', type=str)
+        date_retour = request.args.get('DateRetour', type=str)
         
-        if ville_depart is not None or ville_arrivee is not None:
-            return get_vols_filtered(ville_depart, ville_arrivee)
-        return get_all_vols()
+        if not ville_depart and not ville_arrivee and not date_depart and not date_retour:
+            vols = get_all_vols()
+            return api.marshal(vols, vol_model)
+            
+        if date_retour:
+            resultats = get_vols_filtered(ville_depart, ville_arrivee, date_depart, date_retour)
+            return api.marshal(resultats, vol_search_model)
+            
+        vols = get_vols_filtered(ville_depart, ville_arrivee, date_depart, None)
+        return api.marshal(vols, vol_model)
 
     @ns_vol.doc('create_vol')
     @ns_vol.expect(vol_input_model, validate=True)

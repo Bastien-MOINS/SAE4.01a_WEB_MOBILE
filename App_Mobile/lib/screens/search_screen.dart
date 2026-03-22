@@ -1,5 +1,6 @@
 import 'package:app_mobile/models/flight.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import '../models/api.dart';
 
 class SearchScreen extends StatefulWidget {
@@ -15,9 +16,13 @@ class _SearchScreenState extends State<SearchScreen> {
   final TextEditingController _arrivalController = TextEditingController();
 
   List<Flight> _flights = [];
+  List<Flight> _retourFlights = [];
   Map<int, dynamic> _airports = {};
   Map<int, dynamic> _compagnies = {};
   bool _isLoading = false;
+
+  DateTime? _dateDepart;
+  DateTime? _dateRetour;
 
   @override
   void initState() {
@@ -34,12 +39,15 @@ class _SearchScreenState extends State<SearchScreen> {
       final results = await api.getFlights(
         villeDepart: _departureController.text,
         villeArrivee: _arrivalController.text,
+        dateDepart: _dateDepart?.toIso8601String().substring(0, 10),
+        dateRetour: _dateRetour?.toIso8601String().substring(0, 10),
       );
       final airports = await api.getAirportsMap();
       final compagnies = await api.getCompagniesMap();
       
       setState(() {
-        _flights = results;
+        _flights = results['aller'] ?? [];
+        _retourFlights = results['retour'] ?? [];
         _airports = airports;
         _compagnies = compagnies;
         _isLoading = false;
@@ -72,7 +80,7 @@ class _SearchScreenState extends State<SearchScreen> {
             SliverList.builder(
               itemCount: _flights.length,
               itemBuilder: (BuildContext context, int index) {
-                return _flights[index].toWidget(context, _airports, _compagnies);
+                return _flights[index].toWidget(context, _airports, _compagnies, returnFlights: _retourFlights.isNotEmpty ? _retourFlights : null);
               }
             ),
         ],
@@ -83,7 +91,7 @@ class _SearchScreenState extends State<SearchScreen> {
   SliverAppBar appBar() {
     return SliverAppBar(
       pinned: true,
-      expandedHeight: 90,
+      expandedHeight: 140,
       flexibleSpace: FlexibleSpaceBar(
         background: Padding(
           padding:  EdgeInsets.all(16.0),
@@ -96,6 +104,8 @@ class _SearchScreenState extends State<SearchScreen> {
                     child: TextField(
                       controller: _departureController,
                       decoration: InputDecoration(
+                        filled: true,
+                        fillColor: Colors.white,
                         hintText: "Ville de départ",
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
                       ),
@@ -106,6 +116,8 @@ class _SearchScreenState extends State<SearchScreen> {
                     child: TextField(
                       controller: _arrivalController,
                       decoration: InputDecoration(
+                        filled: true,
+                        fillColor: Colors.white,
                         hintText: "Ville d'arrivée",
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
                       ),
@@ -117,6 +129,61 @@ class _SearchScreenState extends State<SearchScreen> {
                   )
                 ],
               ),
+              SizedBox(height: 8),
+              Row(
+                children: [
+                  calendarSelector("Date aller", _dateDepart, true),
+                  SizedBox(width: 8),
+                  calendarSelector("Date retour", _dateRetour, false),
+                  SizedBox(width: 48),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget calendarSelector(String title, DateTime? selectedDate, bool isDepart) {
+    return Expanded(
+      child: GestureDetector(
+        onTap: () async {
+          DateTime? picked = await showDatePicker(
+            context: context,
+            initialDate: selectedDate ?? DateTime.now(),
+            firstDate: DateTime.now(),
+            lastDate: DateTime(2100),
+          );
+
+          if (picked != null) {
+            setState(() {
+              if (isDepart) {
+                _dateDepart = picked;
+              } else {
+                _dateRetour = picked;
+              }
+            });
+          }
+        },
+        child: Container(
+          padding: EdgeInsets.symmetric(vertical: 14, horizontal: 10),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            border: Border.all(color: Colors.grey.shade400),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                selectedDate != null ? DateFormat('dd/MM/yyyy').format(selectedDate): title,
+                style: TextStyle(
+                  color: selectedDate != null ? Colors.black : Colors.grey.shade600,
+                  fontSize: 14,
+                ),
+              ),
+              Icon(Icons.calendar_today, color: Colors.grey.shade600, size: 18),
             ],
           ),
         ),

@@ -70,7 +70,7 @@ class Flight {
     };
   }
 
-  Widget toWidget(BuildContext context, Map<int, dynamic> airports, Map<int, dynamic> compagnies) {
+  Widget toWidget(BuildContext context, Map<int, dynamic> airports, Map<int, dynamic> compagnies, {List<Flight>? returnFlights, Flight? allerFlight}) {
     final depart = airports[numeroAeroportDepart];
     final arrivee = airports[numeroAeroportArrivee];
     final compagnie = compagnies[idCompagnie];
@@ -84,6 +84,10 @@ class Flight {
                   flight: this,
                   departAirport: Airport.fromJson(depart),
                   arriveeAirport: Airport.fromJson(arrivee),
+                  returnFlights: returnFlights,
+                  airportsMap: airports,
+                  compagniesMap: compagnies,
+                  allerFlight: allerFlight,
                 ),
               ),
             );

@@ -250,19 +250,41 @@ def _parse_time(value):
 def get_all_vols():
     return Vol.query.all()
 
-def get_vols_filtered(ville_depart=None, ville_arrivee=None):
-    query = Vol.query
+def get_vols_filtered(ville_depart=None, ville_arrivee=None, date_depart=None, date_retour=None):
+    query_aller = Vol.query
     
     if ville_depart:
-        query = query.join(Aeroport, Vol.numero_aeroport_dep == Aeroport.numero_aeroport) \
-                     .filter(Aeroport.ville.ilike(f'%{ville_depart}%'))
+        villes_dep = db.session.query(Aeroport.numero_aeroport).filter(Aeroport.ville.ilike(f'%{ville_depart}%'))
+        query_aller = query_aller.filter(Vol.numero_aeroport_dep.in_(villes_dep))
                      
     if ville_arrivee:
-        vols_arrivee = query.join(Aeroport, Vol.numero_aeroport_arr == Aeroport.numero_aeroport) \
-                            .filter(Aeroport.ville.ilike(f'%{ville_arrivee}%'))
-        return vols_arrivee.all()
-                     
-    return query.all()
+        villes_arr = db.session.query(Aeroport.numero_aeroport).filter(Aeroport.ville.ilike(f'%{ville_arrivee}%'))
+        query_aller = query_aller.filter(Vol.numero_aeroport_arr.in_(villes_arr))
+    
+    if date_depart:
+        query_aller = query_aller.filter_by(date_debut=_parse_date(date_depart))
+
+    vols_aller = query_aller.all()
+
+    if not date_retour:
+        return vols_aller
+
+    query_retour = Vol.query
+    
+    if ville_arrivee: 
+        villes_dep_retour = db.session.query(Aeroport.numero_aeroport).filter(Aeroport.ville.ilike(f'%{ville_arrivee}%'))
+        query_retour = query_retour.filter(Vol.numero_aeroport_dep.in_(villes_dep_retour))
+        
+    if ville_depart:
+        villes_arr_retour = db.session.query(Aeroport.numero_aeroport).filter(Aeroport.ville.ilike(f'%{ville_depart}%'))
+        query_retour = query_retour.filter(Vol.numero_aeroport_arr.in_(villes_arr_retour))
+        
+    query_retour = query_retour.filter_by(date_debut=_parse_date(date_retour))
+
+    return {
+        'aller': vols_aller,
+        'retour': query_retour.all()
+    }
 
 def get_vol_by_id(numero_vol):
     return Vol.query.get(numero_vol)

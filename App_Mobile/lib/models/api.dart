@@ -12,7 +12,7 @@ class Api {
       url = "10.0.2.2";
     }
   }
-  Future<List<Flight>> getFlights({String? villeDepart, String? villeArrivee}) async {
+  Future<Map<String, List<Flight>>> getFlights({String? villeDepart, String? villeArrivee, String? dateDepart, String? dateRetour}) async {
     _checkUrl();
     
     Map<String, String> query = {};
@@ -22,17 +22,39 @@ class Api {
     if (villeArrivee != null && villeArrivee.isNotEmpty) {
       query['villeArrivee'] = villeArrivee;
     }
+    if (dateDepart != null && dateDepart.isNotEmpty) {
+      query['DateDepart'] = dateDepart;
+    }
+    if (dateRetour != null && dateRetour.isNotEmpty) {
+      query['DateRetour'] = dateRetour;
+    }
 
     Uri uri = Uri.http("$url:5000", "/vol/", query.isNotEmpty ? query : null);
     
     final response = await http.get(uri);
     if (response.statusCode == 200){
-      List<dynamic> json = jsonDecode(response.body);
-      final _flights = <Flight>[];
-      for (var flight in json){
-        _flights.add(Flight.fromJson(flight));
+      dynamic json = jsonDecode(response.body);
+      final aller = <Flight>[];
+      final retour = <Flight>[];
+      
+      if (json is Map<String, dynamic>) {
+        if (json['aller'] != null) {
+          for (var flight in json['aller']) {
+            aller.add(Flight.fromJson(flight));
+          }
+        }
+        if (json['retour'] != null) {
+          for (var flight in json['retour']) {
+            retour.add(Flight.fromJson(flight));
+          }
+        }
+      } else {
+        for (var flight in json){
+          aller.add(Flight.fromJson(flight));
+        }
       }
-      return _flights;
+      
+      return {'aller': aller, 'retour': retour};
     }else {
       throw Exception('Failed to load flights');
     }
