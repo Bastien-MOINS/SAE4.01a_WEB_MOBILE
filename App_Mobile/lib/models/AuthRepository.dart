@@ -23,6 +23,13 @@ class AuthRepository {
     return false;
   }
 
+  Future<List<String>> getUser() async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    String pseudo = sharedPreferences.getString(PSEUDO_KEY) ?? "";
+    String password = sharedPreferences.getString(PASSWORD_KEY) ?? "";
+    return [pseudo, password];
+  }
+
   Future<bool> isConnected() async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     return sharedPreferences.getBool(IS_CONNECTED_KEY) ?? false;

@@ -1,3 +1,4 @@
+import 'package:app_mobile/screens/profil_screen.dart';
 import 'package:flutter/material.dart';
 import '../models/AuthRepository.dart';
 import 'connection_screen.dart';
@@ -7,30 +8,22 @@ class HomeScreen extends StatelessWidget{
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'Bienvenue',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-            fontSize: 35
-          ),
-        ),
-        centerTitle: true,
+        toolbarHeight: 85,
+        automaticallyImplyLeading: false,
+        title: Image(image: AssetImage('assets/images/logo_bleu2_transparant.png'),
+            height: 70),
         backgroundColor: Colors.blue[900],
           actions: [
             Padding(
-              padding: const EdgeInsets.only(right: 16.0),
+              padding: const EdgeInsets.only(right: 5.0),
               child: GestureDetector(
                 onTap: () async {
                   if (await AuthRepository().isConnected()) {
-                    ScaffoldMessenger.of(context).removeCurrentSnackBar();
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      // faire la page profile
-                      SnackBar(
-                        content: Text('Vous êtes déjà connecté'),
-                        duration: Duration(seconds: 1)
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => SearchScreen(),
                       ),
-
                     );
                   } else {
                     Navigator.push(
@@ -42,9 +35,9 @@ class HomeScreen extends StatelessWidget{
                   }
                 },
                 child: CircleAvatar(
-                  radius: 18,
-                  backgroundColor: Colors.grey[300],
-                  backgroundImage: AssetImage('assets/images/logo_bleu2.png'),
+                  radius: 30,
+                  backgroundColor: Colors.white,
+                  child: Icon(Icons.person, size: 40, color: Colors.black),
                 ),
               ),
             ),
