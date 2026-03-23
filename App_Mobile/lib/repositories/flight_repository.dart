@@ -14,7 +14,6 @@ class FlightRepository {
       for (var f in flights) {
         jsonStrings.add(jsonEncode(f.toJson()));
       }
-
       await sharedPreferences.setStringList(BOOKED_FLIGHTS_KEY, jsonStrings);
     }
   }
@@ -33,5 +32,21 @@ class FlightRepository {
     }
     print(flightsList);
     return flightsList;
+  }
+
+  Future<void> resetAllFlights() async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    await sharedPreferences.setStringList(BOOKED_FLIGHTS_KEY, []);
+  }
+
+  Future<void> AnnulOneVol(numVol) async {
+    List<Flight> flights = await getSavedFlights();
+    flights.removeWhere((f) => f.numeroVol == numVol);
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    List<String> jsonStrings = [];
+    for (var f in flights) {
+      jsonStrings.add(jsonEncode(f.toJson()));
+    }
+    await sharedPreferences.setStringList(BOOKED_FLIGHTS_KEY, jsonStrings);
   }
 }

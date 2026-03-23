@@ -1,9 +1,8 @@
 import 'package:app_mobile/screens/profil_screen.dart';
 import 'package:app_mobile/repositories/flight_repository.dart';
 import 'package:flutter/material.dart';
-import '../models/AuthRepository.dart';
+import '../repositories/auth_repository.dart';
 import 'connection_screen.dart';
-import '../models/flight.dart';
 import '../models/api.dart';
 
 class HomeScreen extends StatelessWidget{
@@ -60,43 +59,62 @@ class HomeScreen extends StatelessWidget{
             ),
           ]
       ),
-      body: Column(
-        children: [
-          const SizedBox(height: 20),
-          Text("Mes prochains vols",
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold
-            ),),
-          const SizedBox(height: 10),
-          Expanded(
-            child: FutureBuilder<Map<String, dynamic>>(
-              future: _loadData(),
-              builder: (context, snapshot){
-                if(snapshot.connectionState == ConnectionState.waiting){
-                  return Center(child: CircularProgressIndicator());
-                }
-                if(snapshot.hasData && (snapshot.data!['flights']).isNotEmpty){
-                  final flights = snapshot.data!['flights'];
-                  final airports = snapshot.data!['airports'];
-                  final compagnies = snapshot.data!['compagnies'];
-                  return ListView.builder(
-                      padding: const EdgeInsets.all(8),
-                      itemCount: flights.length,
-                      itemBuilder: (context, index){
-                        return flights[index].toWidget(context, airports, compagnies);
+      body: FutureBuilder<bool>(
+        future: AuthRepository().isConnected(),
+        builder: (context, snapshot) {
+          bool isConnected = snapshot.data ?? false;
+          if (snapshot.connectionState != ConnectionState.done) {
+            return const Center(
+              child: CircularProgressIndicator(color: Colors.blue),
+            );
+          }
+          if (isConnected) {
+            return Column(
+              children: [
+                const SizedBox(height: 20),
+                Text("Mes prochains vols",
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold
+                  ),),
+                const SizedBox(height: 10),
+                Expanded(
+                  child: FutureBuilder<Map<String, dynamic>>(
+                    future: _loadData(),
+                    builder: (context, snapshot){
+                      if(snapshot.connectionState == ConnectionState.waiting){
+                        return Center(child: CircularProgressIndicator());
                       }
-                  );
-                }
-                if (snapshot.hasError){
-                  print("${snapshot.error}");
-                  return Center(child: Text("Erreur : ${snapshot.error}"),);
-                }
-                return Container();
-              },
-            ),
-          ),
-        ],
+                      if(snapshot.hasData && (snapshot.data!['flights']).isNotEmpty){
+                        final flights = snapshot.data!['flights'];
+                        final airports = snapshot.data!['airports'];
+                        final compagnies = snapshot.data!['compagnies'];
+                        return ListView.builder(
+                          padding: const EdgeInsets.all(8),
+                          itemCount: flights.length,
+                          itemBuilder: (context, index){
+                            return flights[index].toWidget(context, airports, compagnies, onHome: true);
+                          }
+                        );
+                      }
+                      if (snapshot.hasError){
+                        print("${snapshot.error}");
+                        return Center(child: Text("Erreur : ${snapshot.error}"),);
+                      }
+                      return Container();
+                    },
+                  ),
+                ),
+              ],
+            );
+          } else {
+            return Center(
+              child: Text("Veuillez vous connecter",
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)
+              )
+            );
+          }
+        }
       )
     );
   }

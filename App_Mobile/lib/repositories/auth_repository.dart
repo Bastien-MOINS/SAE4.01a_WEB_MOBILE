@@ -1,5 +1,7 @@
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'flight_repository.dart';
+
 class AuthRepository {
   static const PSEUDO_KEY = "user_pseudo";
   static const PASSWORD_KEY = "user_password";
@@ -9,6 +11,7 @@ class AuthRepository {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     await sharedPreferences.setString(PSEUDO_KEY, pseudo);
     await sharedPreferences.setString(PASSWORD_KEY, password);
+    await FlightRepository().resetAllFlights();
   }
 
   Future<bool> login(String pseudo, String password) async {

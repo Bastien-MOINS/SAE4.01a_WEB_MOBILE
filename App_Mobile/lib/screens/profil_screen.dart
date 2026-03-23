@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../models/AuthRepository.dart';
+import '../repositories/auth_repository.dart';
 import 'main_screen.dart';
 
 class SearchScreen extends StatelessWidget {
@@ -48,13 +48,14 @@ class SearchScreen extends StatelessWidget {
                   style: TextStyle(color: Colors.black)),
                   onPressed: () async {
                     await AuthRepository().disconnection();
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => MainScreen())
-                    );
+                    if (!context.mounted) return;
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(content: Text("Déconnexion réussie"),
                         duration: const Duration(seconds: 1)),
+                    );
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => MainScreen())
                     );
                   }
                 ),

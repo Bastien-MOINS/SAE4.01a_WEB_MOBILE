@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:form_field_validator/form_field_validator.dart';
 import 'package:flutter/foundation.dart';
-
-import '../models/AuthRepository.dart';
+import '../repositories/auth_repository.dart';
+import 'main_screen.dart';
 
 class InscrConectScreen extends StatefulWidget {
   const InscrConectScreen({Key? key}) : super(key: key);
@@ -119,7 +119,10 @@ class _RegisterState extends State<InscrConectScreen> {
                                   SnackBar(content: Text('Connexion réussie !'),
                                     duration: const Duration(seconds: 1)),
                                 );
-                                Navigator.pop(context);
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(builder: (context) => MainScreen())
+                                );
                               }
                             }
                           }
