@@ -2,6 +2,7 @@ import 'package:app_mobile/models/flight.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../models/api.dart';
+import 'package:flutter/cupertino.dart';
 
 class SearchScreen extends StatefulWidget {
   const SearchScreen({super.key});
@@ -138,6 +139,22 @@ class _SearchScreenState extends State<SearchScreen> {
                   SizedBox(width: 48),
                 ],
               ),
+              Center(
+                child: CupertinoSlidingSegmentedControl<Correspondence>{
+                  backgroundColor: CupertinoColors.systemGrey2,
+                  thumbColor: skyColors[_selectedSegment]!,
+                  // This represents the currently selected segmented control.
+                  groupValue: _selectedSegment,
+                  isMomentary: _isMomentary,
+                  // Callback that sets the selected segmented control.
+                  onValueChanged: (Correspondence? value) {
+                    if (value != null) {
+                      setState(() {
+                        _selectedSegment = value;
+                      });
+                  )
+                )
+              )
             ],
           ),
         ),

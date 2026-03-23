@@ -1,6 +1,5 @@
 import 'package:app_mobile/models/api.dart';
 import 'package:app_mobile/screens/flight_screen.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'airport.dart';
 import 'api.dart';

@@ -23,7 +23,7 @@ class _MainScreenState extends State<MainScreen>{
             items: [
               BottomNavigationBarItem(
                   icon: Icon(Icons.home),
-                  label:  'Acceuil'
+                  label:  'Accueil'
               ),
               BottomNavigationBarItem(
                   icon: Icon(Icons.search),
