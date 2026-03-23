@@ -1,6 +1,5 @@
 import 'package:app_mobile/models/api.dart';
 import 'package:app_mobile/screens/flight_screen.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'airport.dart';
 import 'api.dart';
@@ -92,71 +91,76 @@ class Flight {
               ),
             );
           },
-        child: Card(
-          elevation: 4,
-          margin: const EdgeInsets.symmetric(horizontal: 200, vertical: 6),
-          shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(15)),
-          child: Padding(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
+        child: LayoutBuilder(
+          builder: (BuildContext context, BoxConstraints constraints) {
+            return Card(
+              elevation: 4,
+              margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15)),
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Icon(Icons.flight_takeoff, color: Colors.blue),
-                    const SizedBox(width: 8),
-                    Text(
-                      compagnie?['nom_compagnie'] ?? "Compagnie $idCompagnie",
-                      style: const TextStyle(
-                          fontWeight: FontWeight.bold, color: Colors.blueGrey),
+                    Row(
+                      children: [
+                        const Icon(Icons.flight_takeoff, color: Colors.blue),
+                        const SizedBox(width: 8),
+                        Text(
+                          compagnie?['nom_compagnie'] ?? "Compagnie $idCompagnie",
+                          style: const TextStyle(
+                              fontWeight: FontWeight.bold, color: Colors.blueGrey),
+                        ),
+                      ],
+                    ),
+                    const Divider(),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text("DÉPART", style: TextStyle(
+                                  color: Colors.grey, fontSize: 10)),
+                              Text(depart?['nom_aeroport'] ??
+                                  "ID $numeroAeroportDepart",
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.bold)),
+                              Text(depart?['ville'] ?? "", style: const TextStyle(
+                                  color: Colors.blueGrey)),
+                              Text(DateFormat('dd/MM/yyyy').format(dateHeureDepart), style: const TextStyle(fontWeight: FontWeight.bold),),
+                              Text(DateFormat.Hm().format(dateHeureDepart), style: const TextStyle(fontWeight: FontWeight.bold),),
+                            ],
+                          ),
+                        ),
+                        const Icon(
+                            Icons.arrow_forward_ios, size: 16, color: Colors.grey),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              const Text("ARRIVÉE", style: TextStyle(
+                                  color: Colors.grey, fontSize: 10)),
+                              Text(arrivee?['nom_aeroport'] ??
+                                  "ID $numeroAeroportArrivee",
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.bold)),
+                              Text(arrivee?['ville'] ?? "", style: const TextStyle(
+                                  color: Colors.blueGrey)),
+                              Text(DateFormat('dd/MM/yyyy').format(dateHeureArrivee), style: const TextStyle(fontWeight: FontWeight.bold),),
+                              Text(DateFormat.Hm().format(dateHeureArrivee), style: const TextStyle(fontWeight: FontWeight.bold),),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
-                const Divider(),
-                Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text("DÉPART", style: TextStyle(
-                              color: Colors.grey, fontSize: 10)),
-                          Text(depart?['nom_aeroport'] ??
-                              "ID $numeroAeroportDepart",
-                              style: const TextStyle(
-                                  fontWeight: FontWeight.bold)),
-                          Text(depart?['ville'] ?? "", style: const TextStyle(
-                              color: Colors.blueGrey)),
-                          Text(DateFormat('dd/MM/yyyy').format(dateHeureDepart), style: const TextStyle(fontWeight: FontWeight.bold),),
-                          Text(DateFormat.Hm().format(dateHeureDepart), style: const TextStyle(fontWeight: FontWeight.bold),),
-                        ],
-                      ),
-                    ),
-                    const Icon(
-                        Icons.arrow_forward_ios, size: 16, color: Colors.grey),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          const Text("ARRIVÉE", style: TextStyle(
-                              color: Colors.grey, fontSize: 10)),
-                          Text(arrivee?['nom_aeroport'] ??
-                              "ID $numeroAeroportArrivee",
-                              style: const TextStyle(
-                                  fontWeight: FontWeight.bold)),
-                          Text(arrivee?['ville'] ?? "", style: const TextStyle(
-                              color: Colors.blueGrey)),
-                          Text(DateFormat('dd/MM/yyyy').format(dateHeureArrivee), style: const TextStyle(fontWeight: FontWeight.bold),),
-                          Text(DateFormat.Hm().format(dateHeureArrivee), style: const TextStyle(fontWeight: FontWeight.bold),),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
+              ),
+            );
+          },
+
         ));
       }
       }
