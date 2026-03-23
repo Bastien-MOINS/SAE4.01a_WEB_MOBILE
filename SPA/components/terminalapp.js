@@ -17,6 +17,12 @@ export class TerminalSubViewApp {
         this.init();
     }
 
+    /**
+     * Notification ephémère (Toast) qui s'affiche sans bloquer les actions de l'utilisateur
+     * @param {String} message 
+     * @param {String} type "success" si l'action est réussi, sinon autre (cela modifie la couleur du pop-up)
+     * @param {number} duration Le temps que le pop-up reste à l'écran
+     */
     showToast(message, type = "success", duration = 3000) {
         const oldToast = document.getElementById("app-toast");
         if (oldToast) oldToast.remove();
@@ -63,7 +69,7 @@ export class TerminalSubViewApp {
         }
     }
 
-
+    // Vue du composant get terminaux
     async renderGetTerminaux() {
         this.state.idTerminal = null;
         let rows = '';
@@ -117,6 +123,7 @@ export class TerminalSubViewApp {
         `;
     }
 
+    // Vue du composant pick terminal by ID
     async renderPickTerminalID(){
         let putordelete = "modifier";
         if (this.state.isDeleting){
@@ -153,6 +160,7 @@ export class TerminalSubViewApp {
         }
     }
 
+    // Vue du composant post/put terminal
     async renderPutPostTerminal(){
         this.aeroports = await AeroportAPI.getAeroports().catch(() => []);
         let http = "Ajouter un terminal";

@@ -18,6 +18,12 @@ export class VolSubViewApp {
         this.init();
     }
 
+    /**
+     * Notification ephémère (Toast) qui s'affiche sans bloquer les actions de l'utilisateur
+     * @param {String} message 
+     * @param {String} type "success" si l'action est réussi, sinon autre (cela modifie la couleur du pop-up)
+     * @param {number} duration Le temps que le pop-up reste à l'écran
+     */
     showToast(message, type = "success", duration = 3000) {
         const oldToast = document.getElementById("app-toast");
         if (oldToast) oldToast.remove();
@@ -64,7 +70,7 @@ export class VolSubViewApp {
         }
     }
 
-
+    // Vue du composant get vol
     async renderGetVol() {
         this.state.idVol = null;
         let rows = '';
@@ -152,6 +158,7 @@ export class VolSubViewApp {
         `;
     }
 
+    // Vue du composant choose vol by ID
     async renderPickVolID(){
         let putordelete = "modifier";
         if (this.state.isDeleting){
@@ -188,6 +195,7 @@ export class VolSubViewApp {
         }
     }
 
+    // Vue du composant post/put vol
     async renderPutPostVol(){
         // Récupération des données pour les listes
         this.cache = {

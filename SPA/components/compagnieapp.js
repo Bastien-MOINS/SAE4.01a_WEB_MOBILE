@@ -15,6 +15,12 @@ export class CompagnieSubViewApp {
         this.init();
     }
 
+    /**
+     * Notification ephémère (Toast) qui s'affiche sans bloquer les actions de l'utilisateur
+     * @param {String} message 
+     * @param {String} type "success" si l'action est réussi, sinon autre (cela modifie la couleur du pop-up)
+     * @param {number} duration Le temps que le pop-up reste à l'écran
+     */
     showToast(message, type = "success", duration = 3000) {
         const oldToast = document.getElementById("app-toast");
         if (oldToast) oldToast.remove();
@@ -61,7 +67,7 @@ export class CompagnieSubViewApp {
         }
     }
 
-
+    // Vue du composant get Compagnies
     renderGetCompagnie() {
         this.state.idCompagnie = null;
         let rows = '';
@@ -106,6 +112,7 @@ export class CompagnieSubViewApp {
         `;
     }
 
+    // Vue du composant pick Compagnie by ID
     async renderPickCompagnieID(){
         let putordelete = "modifier";
         if (this.state.isDeleting){
@@ -142,6 +149,7 @@ export class CompagnieSubViewApp {
         }
     }
 
+    // Vue du composant post/put Compagnie
     async renderPutPostCompagnie(){
         let http = "Ajouter une compagnie";
         let iconClass = "fa-circle-plus text-green-600";
