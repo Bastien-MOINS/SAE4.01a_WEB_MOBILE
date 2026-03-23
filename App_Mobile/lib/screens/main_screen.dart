@@ -11,7 +11,7 @@ class MainScreen extends StatefulWidget{
 
 class _MainScreenState extends State<MainScreen>{
   int currentIndex = 0;
-  final List<Widget> screens = [HomeScreen(), MapScreen(), SearchScreen()];
+  final List<Widget> screens = [HomeScreen(), SearchScreen(), MapScreen()];
   @override
   Widget build(BuildContext context) {
     return MaterialApp(

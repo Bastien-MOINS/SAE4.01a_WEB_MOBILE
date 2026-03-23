@@ -3,7 +3,7 @@ from .models import *
 from flask_restx import Resource, Namespace, fields
 from datetime import datetime
 from .app import app, db, api
-from .api_models import aeroport_model, aeroport_input_model, terminal_model, terminal_input_model, vol_model, vol_input_model, compagnie_input_model, compagnie_model
+from .api_models import aeroport_model, aeroport_input_model, terminal_model, terminal_input_model, vol_model, vol_input_model, compagnie_input_model, compagnie_model, vol_search_model
 
 ns_compagnie = api.namespace('compagnies')
 
@@ -85,8 +85,12 @@ class AeroportCollection(Resource):
             abort(400, "La ville doit être une chaîne de caractères.")
         if not data.get('pays') or not isinstance(data.get('pays'), str):
             abort(400, "Le pays doit être une chaîne de caractères.")
+        if 'latitude' not in data or not isinstance(data.get('latitude'), (int, float)):
+            abort(400, "La latitude doit être un nombre.")
+        if 'longitude' not in data or not isinstance(data.get('longitude'), (int, float)):
+            abort(400, "La longitude doit être un nombre.")
 
-        return create_aeroport(nom_aeroport=data.get('nom_aeroport'), ville=data.get('ville'), pays=data.get('pays')), 201
+        return create_aeroport(nom_aeroport=data.get('nom_aeroport'), ville=data.get('ville'), pays=data.get('pays'), latitude=data.get('latitude'), longitude=data.get('longitude')), 201
 
 @ns_aeroport.route('/<int:id>')
 @ns_aeroport.response(404, 'Aéroport non trouvé')
@@ -120,7 +124,11 @@ class AeroportItem(Resource):
             abort(400, "La ville doit être une chaîne de caractères.")
         if 'pays' in data and not isinstance(data.get('pays'), str):
             abort(400, "Le pays doit être une chaîne de caractères.")
-        aeroport = update_aeroport(id=id, nom_aeroport=data.get('nom_aeroport'), ville=data.get('ville'), pays=data.get('pays'))
+        if 'latitude' in data and not isinstance(data.get('latitude'), (int, float)):
+            abort(400, "La latitude doit être un nombre.")
+        if 'longitude' in data and not isinstance(data.get('longitude'), (int, float)):
+            abort(400, "La longitude doit être un nombre.")
+        aeroport = update_aeroport(id=id, nom_aeroport=data.get('nom_aeroport'), ville=data.get('ville'), pays=data.get('pays'), latitude=data.get('latitude'), longitude=data.get('longitude'))
         if not aeroport:
             abort(404, f"Impossible de modifier : l'aéroport avec l'identifiant {id} n'existe pas.")
         return aeroport
@@ -215,13 +223,32 @@ class TerminalItem(Resource):
     
 ns_vol = api.namespace('vol')
 
+parser_vols = api.parser()
+parser_vols.add_argument('villeDepart', type=str, location='args', help='Nom de la ville de départ')
+parser_vols.add_argument('villeArrivee', type=str, location='args', help='Nom de la ville d\'arrivée')
+parser_vols.add_argument('DateDepart', type=str, location='args', help='Date de départ pour l\'aller')
+parser_vols.add_argument('DateRetour', type=str, location='args', help='Date de départ pour le retour')
+
 @ns_vol.route('/')
 class VolCollection(Resource):
-    @ns_vol.doc('list_vols')
-    @ns_vol.marshal_list_with(vol_model)
+    @ns_vol.doc('list_vols', parser=parser_vols)
     def get(self):
-        '''Liste tous les vols'''
-        return get_all_vols()
+        '''Recherche de vols Aller/Retour ou liste tous les vols'''
+        ville_depart = request.args.get('villeDepart', type=str)
+        ville_arrivee = request.args.get('villeArrivee', type=str)
+        date_depart = request.args.get('DateDepart', type=str)
+        date_retour = request.args.get('DateRetour', type=str)
+        
+        if not ville_depart and not ville_arrivee and not date_depart and not date_retour:
+            vols = get_all_vols()
+            return api.marshal(vols, vol_model)
+            
+        if date_retour:
+            resultats = get_vols_filtered(ville_depart, ville_arrivee, date_depart, date_retour)
+            return api.marshal(resultats, vol_search_model)
+            
+        vols = get_vols_filtered(ville_depart, ville_arrivee, date_depart, None)
+        return api.marshal(vols, vol_model)
 
     @ns_vol.doc('create_vol')
     @ns_vol.expect(vol_input_model, validate=True)
