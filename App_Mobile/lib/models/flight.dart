@@ -94,7 +94,7 @@ class Flight {
           },
         child: Card(
           elevation: 4,
-          margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+          margin: const EdgeInsets.symmetric(horizontal: 200, vertical: 6),
           shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(15)),
           child: Padding(
@@ -128,6 +128,8 @@ class Flight {
                                   fontWeight: FontWeight.bold)),
                           Text(depart?['ville'] ?? "", style: const TextStyle(
                               color: Colors.blueGrey)),
+                          Text(DateFormat('dd/MM/yyyy').format(dateHeureDepart), style: const TextStyle(fontWeight: FontWeight.bold),),
+                          Text(DateFormat.Hm().format(dateHeureDepart), style: const TextStyle(fontWeight: FontWeight.bold),),
                         ],
                       ),
                     ),
@@ -145,6 +147,8 @@ class Flight {
                                   fontWeight: FontWeight.bold)),
                           Text(arrivee?['ville'] ?? "", style: const TextStyle(
                               color: Colors.blueGrey)),
+                          Text(DateFormat('dd/MM/yyyy').format(dateHeureArrivee), style: const TextStyle(fontWeight: FontWeight.bold),),
+                          Text(DateFormat.Hm().format(dateHeureArrivee), style: const TextStyle(fontWeight: FontWeight.bold),),
                         ],
                       ),
                     ),
