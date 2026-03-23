@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../models/AuthRepository.dart';
 import 'connection_screen.dart';
 
 class HomeScreen extends StatelessWidget{
@@ -20,14 +21,25 @@ class HomeScreen extends StatelessWidget{
             Padding(
               padding: const EdgeInsets.only(right: 16.0),
               child: GestureDetector(
-                onTap: () {
-                  print("Le rond a été cliqué !");
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => Register(),
-                    ),
-                  );
+                onTap: () async {
+                  if (await AuthRepository().isConnected()) {
+                    ScaffoldMessenger.of(context).removeCurrentSnackBar();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      // faire la page profile
+                      SnackBar(
+                        content: Text('Vous êtes déjà connecté'),
+                        duration: Duration(seconds: 1)
+                      ),
+
+                    );
+                  } else {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => InscrConectScreen(),
+                      ),
+                    );
+                  }
                 },
                 child: CircleAvatar(
                   radius: 18,

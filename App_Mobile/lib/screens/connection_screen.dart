@@ -2,21 +2,27 @@ import 'package:flutter/material.dart';
 import 'package:form_field_validator/form_field_validator.dart';
 import 'package:flutter/foundation.dart';
 
-class Register extends StatefulWidget {
-  const Register({Key? key}) : super(key: key);
+import '../models/AuthRepository.dart';
+
+class InscrConectScreen extends StatefulWidget {
+  const InscrConectScreen({Key? key}) : super(key: key);
 
   @override
-  State<Register> createState() => _RegisterState();
+  State<InscrConectScreen> createState() => _RegisterState();
 }
 
-class _RegisterState extends State<Register> {
+class _RegisterState extends State<InscrConectScreen> {
   Map userData = {};
   final _formkey = GlobalKey<FormState>();
+  bool _pageInscription = false;
+  final TextEditingController _pseudoCont = TextEditingController();
+  final TextEditingController _passwordCont = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: Text('register'),
+          title: Text(_pageInscription ? 'Inscription' : 'Connexion'),
         ),
         body: SingleChildScrollView(
           child: Padding(
@@ -29,6 +35,7 @@ class _RegisterState extends State<Register> {
                     Padding(
                       padding: const EdgeInsets.all(12.0),
                       child: TextFormField(
+                        controller: _pseudoCont,
                         validator: MultiValidator([
                           RequiredValidator(errorText: 'Entrez votre pseudo'),
                         ]).call,
@@ -50,6 +57,8 @@ class _RegisterState extends State<Register> {
                     Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: TextFormField(
+                        controller: _passwordCont,
+                        obscureText: true,
                         validator: MultiValidator([
                           RequiredValidator(errorText: 'Entrez votre mot de passe'),
                         ]).call,
@@ -80,18 +89,57 @@ class _RegisterState extends State<Register> {
                                   borderRadius: BorderRadius.circular(30),
                                 ),
                               ),
-                              child: Text(
-                                'Inscription',
+                              child: Text(_pageInscription ? 'Inscription' : 'Connexion',
                                 style: TextStyle(color: Colors.white, fontSize: 22),
                               ),
-                              onPressed: () {
+                              onPressed: () async{
                                 if (_formkey.currentState!.validate()) {
-                                  print('form submitted');
+                                  String pseudo = _pseudoCont.text;
+                                  String password = _passwordCont.text;
+                                  if (_pageInscription) {
+                                    await AuthRepository().register(pseudo, password);
+                                  } else {
+                                    bool reussie = await AuthRepository().login(pseudo, password);
+                                    if (!reussie) {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(content: Text("Connection échoué (pseudo ou mdp inccorect)")),
+                                      );
+                                      return;
+                                    }
+                                  }
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(content: Text(
+                                        _pageInscription ? 'Inscription réussie !' : 'Connexion réussie !'
+                                            )),
+                                  );
+                                  Navigator.pop(context);
                                 }
                               },
                             ),
                           ),
                         )),
+                    Center(
+                      child: TextButton(
+                        style: TextButton.styleFrom(
+                          padding: EdgeInsets.zero,
+                          backgroundColor: Colors.transparent,
+                          shadowColor: Colors.transparent,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _pageInscription = !_pageInscription;
+                          });
+                        },
+                        child: Text(
+                          _pageInscription ? "Déjà un compte ? Se connecter" : "Pas de compte ? S'inscrire",
+                          style: const TextStyle(
+                            color: Colors.blue,
+                            fontStyle: FontStyle.italic,
+                            decoration: TextDecoration.underline,
+                          ),
+                        ),
+                      ),
+                    )
                   ],
                 )),
           ),
