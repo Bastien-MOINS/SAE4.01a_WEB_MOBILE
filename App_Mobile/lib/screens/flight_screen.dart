@@ -50,19 +50,19 @@ class FlightScreen extends StatelessWidget{
                   margin: const EdgeInsets.all(20),
                   child: Column(
                     children: [
-                      SizedBox(height: 300, width: 400, child: custom_map.Map(
-                        posDepart: LatLng(departAirport.latitude, departAirport.longitude),
-                        posArrivee: LatLng(arriveeAirport.latitude, arriveeAirport.longitude),
-                      )),
+                      Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: SizedBox(height: 300, width: 400, child: custom_map.Map(
+                          posDepart: LatLng(departAirport.latitude, departAirport.longitude),
+                          posArrivee: LatLng(arriveeAirport.latitude, arriveeAirport.longitude),
+                        )),
+                      ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: Text("Informations du vol sélectionné : ", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),),
                       ),
                       Card(
-                        elevation: 4,
                         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(15)),
                         child: Padding(
                           padding: const EdgeInsets.all(20),
                           child: Column(
@@ -123,7 +123,13 @@ class FlightScreen extends StatelessWidget{
                         ),
                       ),
                       if (!unRetour)
-                        ElevatedButton(
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 24.0, horizontal: 16.0),
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 16),
+                              textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                            ),
                             onPressed: () async {
                               await FlightRepository().saveFlight(flight);
                               if (allerFlight != null) {
@@ -137,7 +143,7 @@ class FlightScreen extends StatelessWidget{
                               );
                             },
                             child: Text("Réserver"))
-                    ],
+                        )],
                   ),
                 ),
               )),
