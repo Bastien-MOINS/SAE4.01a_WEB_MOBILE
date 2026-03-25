@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
-
+/// Implémente le package FlutterMap adapté pour représenter le trajet d'un vol
 class Map extends StatelessWidget {
   final LatLng posDepart;
   final LatLng posArrivee;
 
   Map({required this.posDepart, required this.posArrivee});
-
+  
+  /// Retourne une [List<LatLng>] qui décrivent tous les points où afficher la courbe
+  /// Les points sont calculés à partir de [depart] et [arrivee]
+  /// Ces points correspondent aux aéroport de départ et d'arrivée d'un vol
   List<LatLng> _generateBezierPoints(LatLng depart, LatLng arrivee) {
     List<LatLng> points = [];
     
@@ -30,7 +33,8 @@ class Map extends StatelessWidget {
     }
     return points;
   }
-
+  /// Construit le widget [FlutterMap]
+  /// Réprésente le trajet par une courbe de Bezier et des icons au positions des aéroports
   @override
   Widget build(BuildContext context) {
     final curvePoints = _generateBezierPoints(posDepart, posArrivee);

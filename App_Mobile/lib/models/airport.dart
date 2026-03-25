@@ -2,6 +2,8 @@ import 'package:app_mobile/screens/flight_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
+/// Représente un aéroport
+/// Centralise les informations essentielles d'un aéroport
 class Airport {
   int numeroAeroport;
   String nomAeroport;
@@ -17,6 +19,7 @@ class Airport {
     required this.longitude
   });
 
+  /// Instancie un aéroport à partir de json
   factory Airport.fromJson(dynamic json) {
     return Airport(
         numeroAeroport: json['numero_aeroport'],

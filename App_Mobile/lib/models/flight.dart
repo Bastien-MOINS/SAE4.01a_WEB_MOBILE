@@ -4,7 +4,8 @@ import 'package:flutter/material.dart';
 import 'airport.dart';
 import 'api.dart';
 import 'package:intl/intl.dart';
-
+/// Représente un vol
+/// Implémente toutes les méthodes nécessaires ppur gérer les vols
 class Flight {
   int numeroVol;
   late DateTime dateHeureDepart;
@@ -34,7 +35,7 @@ class Flight {
     dateHeureDepart = DateTime.parse('$dateDepart $heureDepart');
     dateHeureArrivee = DateTime.parse('$dateArrivee $heureArrivee');
   }
-
+  /// Instancie un vol à partir de json
   factory Flight.fromJson(Map<String, dynamic> json) {
     return Flight(
         numeroVol: json['numero_vol'],
@@ -51,7 +52,7 @@ class Flight {
         longitude: (json['longitude'] ?? 0.0).toDouble()
     );
   }
-
+  /// Traduit un objet en json
   Map<String, dynamic> toJson() {
     return {
       'numero_vol': numeroVol,
@@ -68,7 +69,8 @@ class Flight {
       'longitude': longitude,
     };
   }
-
+  /// Retourne un widget Card
+  /// Le widget retourné affiche les informations liés au vol et permet sa réservation
   Widget toWidget(BuildContext context, Map<int, dynamic> airports, Map<int, dynamic> compagnies, {List<Flight>? returnFlights, Flight? allerFlight}) {
     final depart = airports[numeroAeroportDepart];
     final arrivee = airports[numeroAeroportArrivee];

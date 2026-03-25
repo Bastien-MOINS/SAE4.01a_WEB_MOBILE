@@ -6,7 +6,7 @@ import '../models/flight.dart';
 import '../repositories/flight_repository.dart';
 import 'map.dart' as custom_map;
 import 'package:latlong2/latlong.dart';
-
+/// Implémente la vue de détail d'un vol
 class FlightScreen extends StatelessWidget{
   const FlightScreen({
     super.key, 
@@ -27,6 +27,7 @@ class FlightScreen extends StatelessWidget{
   final Map<int, dynamic>? compagniesMap;
   final Flight? allerFlight;
 
+  /// Construit le widget [Scaffold] correspondant à la vue de détail d'un vol
   @override
   Widget build(BuildContext context) {
       List<Flight> volsRetours = [];
