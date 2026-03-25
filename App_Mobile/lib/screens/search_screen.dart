@@ -91,7 +91,7 @@ class _SearchScreenState extends State<SearchScreen> {
   SliverAppBar appBar() {
     return SliverAppBar(
       pinned: true,
-      expandedHeight: 140,
+      expandedHeight: 250,
       flexibleSpace: FlexibleSpaceBar(
         background: Padding(
           padding:  EdgeInsets.all(16.0),
@@ -106,6 +106,7 @@ class _SearchScreenState extends State<SearchScreen> {
                       decoration: InputDecoration(
                         filled: true,
                         fillColor: Colors.white,
+                        prefixIcon: Icon(Icons.location_pin, color: Colors.grey),
                         hintText: "Ville de départ",
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
                       ),
@@ -118,15 +119,12 @@ class _SearchScreenState extends State<SearchScreen> {
                       decoration: InputDecoration(
                         filled: true,
                         fillColor: Colors.white,
+                        prefixIcon: Icon(Icons.location_pin, color: Colors.grey),
                         hintText: "Ville d'arrivée",
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
                       ),
                     ),
                   ),
-                  IconButton(
-                    icon: Icon(Icons.search),
-                    onPressed: _searchFlights,
-                  )
                 ],
               ),
               SizedBox(height: 8),
@@ -137,7 +135,18 @@ class _SearchScreenState extends State<SearchScreen> {
                   calendarSelector("Date retour", _dateRetour, false),
                   SizedBox(width: 48),
                 ],
+
               ),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: _searchFlights,
+                  child: Text("Rechercher un vol"),
+                  style: ButtonStyle(
+                    backgroundColor: MaterialStateProperty.all<Color>( Colors.white),
+                  ),
+                ),
+              )
             ],
           ),
         ),
