@@ -5,13 +5,20 @@ import 'package:app_mobile/models/flight.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
+/// Implémente les méthodes pour communiquer avec l'API REST
+/// Effectue l'ensemble des requêtes HTTP nécessaires au fonctionnement de l'app
 class Api {
   String url = "localhost";
+
+  /// Vérifie et adapte l'URL du serveur selon la plateforme
   void _checkUrl() {
     if (!kIsWeb && Platform.isAndroid) {
       url = "10.0.2.2";
     }
   }
+
+  /// Permet de récupérer des vols en fonction de différents paramètres
+  /// Retourne un [Future<Map<String, List<Flight>>>] contenant les vols allers et potentiellement retours
   Future<Map<String, List<Flight>>> getFlights({String? villeDepart, String? villeArrivee, String? dateDepart, String? dateRetour}) async {
     _checkUrl();
     
@@ -62,6 +69,8 @@ class Api {
   static Map<int, dynamic>? _airportsMap;
   static Map<int, dynamic>? _compagniesMap;
 
+  /// Récupère l'ensemble des aéroports à partir du serveur REST
+  /// Retourne une [Map<int, dynamic>] correspondant à un dictionnaire des vols indexée par l'identifiant de l'aéroport
   Future<Map<int, dynamic>> getAirportsMap() async {
     if (_airportsMap != null) return _airportsMap!;
     _checkUrl();
@@ -75,6 +84,8 @@ class Api {
     }
   }
 
+  /// Récupère l'ensemble des compagnies aériennes depuis l'API REST
+  /// Retourne une [Map<int, dynamic>] correspondant à un dictionnaire de compagnies indexée par l'identifiant de chaque compagnie
   Future<Map<int, dynamic>> getCompagniesMap() async {
     if (_compagniesMap != null) return _compagniesMap!;
     _checkUrl();
@@ -87,6 +98,9 @@ class Api {
       throw Exception('Failed to load compagnies json');
     }
   }
+
+  /// Récupère un aéroport grâce à son numéro via l'API REST
+  /// Retourne un [Airport]
   Future<Airport> getAirport(int index) async {
     _checkUrl();
     final response = await http.get(Uri.parse("http://$url:5000/aeroports/$index"));

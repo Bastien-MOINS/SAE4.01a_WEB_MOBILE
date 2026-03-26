@@ -2,14 +2,14 @@ import 'package:app_mobile/models/flight.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../models/api.dart';
-
+/// Implémente la vue de recherche de vol avec filtres
 class SearchScreen extends StatefulWidget {
   const SearchScreen({super.key});
 
   @override
   State<SearchScreen> createState() => _SearchScreenState();
 }
-
+/// Gère l'état de la page, selon le chargement et les données
 class _SearchScreenState extends State<SearchScreen> {
   final api = Api();
   final TextEditingController _departureController = TextEditingController();
@@ -30,6 +30,8 @@ class _SearchScreenState extends State<SearchScreen> {
     _searchFlights();
   }
 
+  /// Effectue la recherche de vols via l'API, en utilisant les filtres choisis
+  /// Met à jour l'état de l'application et l'affichage avec les résultats
   void _searchFlights() async {
     setState(() {
       _isLoading = true;
@@ -62,6 +64,8 @@ class _SearchScreenState extends State<SearchScreen> {
     }
   }
 
+  /// Construit le widget [Scaffold] correspondant à la vue de recherche
+  /// Combine les filtres de recherche et l'affichage des résultats
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -88,10 +92,12 @@ class _SearchScreenState extends State<SearchScreen> {
     );
   }
 
+  /// Construit la barre d'entête [SliverAppBar] avec le formulaire de filtres
+  /// Contient les champs pour filtrer par villes et dates
   SliverAppBar appBar() {
     return SliverAppBar(
       pinned: true,
-      expandedHeight: 140,
+      expandedHeight: 250,
       flexibleSpace: FlexibleSpaceBar(
         background: Padding(
           padding:  EdgeInsets.all(16.0),
@@ -106,6 +112,7 @@ class _SearchScreenState extends State<SearchScreen> {
                       decoration: InputDecoration(
                         filled: true,
                         fillColor: Colors.white,
+                        prefixIcon: Icon(Icons.location_pin, color: Colors.grey),
                         hintText: "Ville de départ",
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
                       ),
@@ -118,26 +125,41 @@ class _SearchScreenState extends State<SearchScreen> {
                       decoration: InputDecoration(
                         filled: true,
                         fillColor: Colors.white,
+                        prefixIcon: Icon(Icons.location_pin, color: Colors.grey),
                         hintText: "Ville d'arrivée",
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
                       ),
                     ),
                   ),
-                  IconButton(
-                    icon: Icon(Icons.search),
-                    onPressed: _searchFlights,
-                  )
                 ],
               ),
-              SizedBox(height: 8),
+              SizedBox(height: 12),
               Row(
                 children: [
-                  calendarSelector("Date aller", _dateDepart, true),
+                  Expanded(child: calendarSelector("Date aller", _dateDepart, true)),
                   SizedBox(width: 8),
-                  calendarSelector("Date retour", _dateRetour, false),
-                  SizedBox(width: 48),
+                  Expanded(child: calendarSelector("Date retour", _dateRetour, false)),
                 ],
               ),
+              SizedBox(height: 12),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: _searchFlights,
+                  style: ButtonStyle(
+                    backgroundColor: WidgetStateProperty.all<Color>(Colors.white),
+                    shape: WidgetStateProperty.all<RoundedRectangleBorder>(
+                      RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                    padding: WidgetStateProperty.all<EdgeInsets>(
+                      EdgeInsets.symmetric(vertical: 12),
+                    ),
+                  ),
+                  child: Text("Rechercher un vol"),
+                ),
+              )
             ],
           ),
         ),
@@ -145,47 +167,50 @@ class _SearchScreenState extends State<SearchScreen> {
     );
   }
 
+  /// Construit et retourne un sélecteur de date
+  /// Affiche le [showDatePicker] lors d'un clic et met à jour l'état
   Widget calendarSelector(String title, DateTime? selectedDate, bool isDepart) {
-    return Expanded(
-      child: GestureDetector(
-        onTap: () async {
-          DateTime? picked = await showDatePicker(
-            context: context,
-            initialDate: selectedDate ?? DateTime.now(),
-            firstDate: DateTime.now(),
-            lastDate: DateTime(2100),
-          );
+    return GestureDetector(
+      onTap: () async {
+        DateTime? picked = await showDatePicker(
+          context: context,
+          initialDate: selectedDate ?? DateTime.now(),
+          firstDate: DateTime.now(),
+          lastDate: DateTime(2100),
+        );
 
-          if (picked != null) {
-            setState(() {
-              if (isDepart) {
-                _dateDepart = picked;
-              } else {
-                _dateRetour = picked;
-              }
-            });
-          }
-        },
-        child: Container(
-          padding: EdgeInsets.symmetric(vertical: 14, horizontal: 10),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            border: Border.all(color: Colors.grey.shade400),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
+        if (picked != null) {
+          setState(() {
+            if (isDepart) {
+              _dateDepart = picked;
+            } else {
+              _dateRetour = picked;
+            }
+          });
+          _searchFlights();
+        }
+      },
+      child: Container(
+        padding: EdgeInsets.symmetric(vertical: 14, horizontal: 10),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          border: Border.all(color: Colors.grey.shade400),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Row(
+          children: [
+            Icon(Icons.calendar_today, color: Colors.grey.shade600, size: 18),
+            SizedBox(width: 10),
+            Expanded(
+              child: Text(
                 selectedDate != null ? DateFormat('dd/MM/yyyy').format(selectedDate): title,
                 style: TextStyle(
                   color: selectedDate != null ? Colors.black : Colors.grey.shade600,
                   fontSize: 14,
                 ),
               ),
-              Icon(Icons.calendar_today, color: Colors.grey.shade600, size: 18),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

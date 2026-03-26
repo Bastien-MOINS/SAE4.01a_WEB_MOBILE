@@ -248,7 +248,7 @@ def _parse_time(value):
 
 
 def get_all_vols():
-    return Vol.query.all()
+    return Vol.query.filter(Vol.date_debut >= date.today()).all()
 
 def get_vols_filtered(ville_depart=None, ville_arrivee=None, date_depart=None, date_retour=None):
     query_aller = Vol.query
