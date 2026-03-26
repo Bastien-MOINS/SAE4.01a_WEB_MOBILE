@@ -4,6 +4,8 @@ import 'package:intl/intl.dart';
 import '../models/api.dart';
 import 'package:flutter/cupertino.dart';
 
+import '../models/correspondence.dart';
+
 class SearchScreen extends StatefulWidget {
   const SearchScreen({super.key});
 
@@ -21,6 +23,7 @@ class _SearchScreenState extends State<SearchScreen> {
   Map<int, dynamic> _airports = {};
   Map<int, dynamic> _compagnies = {};
   bool _isLoading = false;
+  Correspondence _selectedSegment = Correspondence.direct;
 
   DateTime? _dateDepart;
   DateTime? _dateRetour;
@@ -54,6 +57,7 @@ class _SearchScreenState extends State<SearchScreen> {
         _isLoading = false;
       });
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         _isLoading = false;
       });
@@ -92,7 +96,7 @@ class _SearchScreenState extends State<SearchScreen> {
   SliverAppBar appBar() {
     return SliverAppBar(
       pinned: true,
-      expandedHeight: 140,
+      expandedHeight: 200,
       flexibleSpace: FlexibleSpaceBar(
         background: Padding(
           padding:  EdgeInsets.all(16.0),
@@ -139,21 +143,23 @@ class _SearchScreenState extends State<SearchScreen> {
                   SizedBox(width: 48),
                 ],
               ),
+              SizedBox(height: 12),
               Center(
-                child: CupertinoSlidingSegmentedControl<Correspondence>{
-                  backgroundColor: CupertinoColors.systemGrey2,
-                  thumbColor: skyColors[_selectedSegment]!,
-                  // This represents the currently selected segmented control.
+                child: CupertinoSlidingSegmentedControl<Correspondence>(
                   groupValue: _selectedSegment,
-                  isMomentary: _isMomentary,
-                  // Callback that sets the selected segmented control.
                   onValueChanged: (Correspondence? value) {
                     if (value != null) {
                       setState(() {
                         _selectedSegment = value;
                       });
-                  )
-                )
+                    }
+                  },
+                  children: const <Correspondence, Widget>{
+                    Correspondence.direct: Text('Direct'),
+                    Correspondence.one: Text('1 escale'),
+                    Correspondence.two: Text('2 escales'),
+                  },
+                ),
               )
             ],
           ),

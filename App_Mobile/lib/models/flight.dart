@@ -93,7 +93,7 @@ class Flight {
           },
         child: Card(
           elevation: 4,
-          margin: const EdgeInsets.symmetric(horizontal: 200, vertical: 6),
+          margin: const EdgeInsets.symmetric(horizontal: 50, vertical: 6),
           shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(15)),
           child: Padding(
