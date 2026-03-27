@@ -34,21 +34,13 @@ class HomeScreen extends StatelessWidget{
               padding: const EdgeInsets.only(right: 5.0),
               child: GestureDetector(
                 onTap: () async {
-                  if (await AuthRepository().isConnected()) {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => SearchScreen(),
-                      ),
-                    );
-                  } else {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => InscrConectScreen(),
-                      ),
-                    );
-                  }
+                  var isConnected = await AuthRepository().isConnected();
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute (
+                      builder: (context) => isConnected ? SearchScreen() : InscrConectScreen(),
+                    ),
+                  );
                 },
                 child: CircleAvatar(
                   radius: 30,
