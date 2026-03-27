@@ -88,8 +88,8 @@ class Flight {
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
-        onTap: () async {
-          if (!onHome && await AuthRepository().isConnected()) {
+        onTap: () {
+          if (!onHome) {
             Navigator.push(
               context,
               MaterialPageRoute(
