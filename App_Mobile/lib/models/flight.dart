@@ -3,6 +3,7 @@ import 'package:app_mobile/models/api.dart';
 import 'package:app_mobile/screens/flight_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import '../repositories/auth_repository.dart';
 import '../repositories/flight_repository.dart';
 import 'package:app_mobile/screens/map.dart' as custom_map;
 import '../screens/main_screen.dart';
@@ -87,8 +88,8 @@ class Flight {
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
-        onTap: () {
-          if (!onHome) {
+        onTap: () async {
+          if (!onHome && await AuthRepository().isConnected()) {
             Navigator.push(
               context,
               MaterialPageRoute(
