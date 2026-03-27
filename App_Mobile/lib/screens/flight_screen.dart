@@ -1,11 +1,12 @@
 import 'package:app_mobile/models/airport.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:intl/intl.dart';
 import '../models/flight.dart';
 import '../repositories/flight_repository.dart';
 import 'map.dart' as custom_map;
 import 'package:latlong2/latlong.dart';
-
+/// Implémente la vue de détail d'un vol
 class FlightScreen extends StatelessWidget{
   const FlightScreen({
     super.key, 
@@ -26,6 +27,7 @@ class FlightScreen extends StatelessWidget{
   final Map<int, dynamic>? compagniesMap;
   final Flight? allerFlight;
 
+  /// Construit le widget [Scaffold] correspondant à la vue de détail d'un vol
   @override
   Widget build(BuildContext context) {
       List<Flight> volsRetours = [];
@@ -33,7 +35,7 @@ class FlightScreen extends StatelessWidget{
         volsRetours = returnFlights!.where((f) => f.numeroAeroportDepart == flight.numeroAeroportArrivee).toList();
       }
       bool unRetour = volsRetours.isNotEmpty;
-
+      final compagnie = compagniesMap?[flight.idCompagnie];
       return Scaffold(
         appBar: AppBar(
           title: Text(unRetour ? "Choisir le vol de retour" : "Vol N°${flight.numeroVol}"),
@@ -42,34 +44,108 @@ class FlightScreen extends StatelessWidget{
         body: SingleChildScrollView(
           child: Column(
             children: [
-              Center(child: Card(
-                child: Column(
-                  children: [
-                    Text(flight.numeroVol.toString()),
-                    SizedBox(height: 300, width: 400, child: custom_map.Map(
-                      posDepart: LatLng(departAirport.latitude, departAirport.longitude),
-                      posArrivee: LatLng(arriveeAirport.latitude, arriveeAirport.longitude),
-                    )),
-                    Text("depart lat ${departAirport.latitude}"),
-                    Text("depart long ${departAirport.longitude}"),
-                    Text("arrivee lat ${arriveeAirport.latitude}"),
-                    Text("arrivee long ${arriveeAirport.longitude}"),
-                    if (!unRetour)
-                      ElevatedButton(
-                          onPressed: () async {
-                            await FlightRepository().saveFlight(flight);
-                            if (allerFlight != null) {
-                              await FlightRepository().saveFlight(allerFlight!);
-                            }
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text("Vol(s) réservé(s) avec succès"),
-                                backgroundColor: Colors.green,
+              Center(child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 500),
+
+                child: Card(
+                  margin: const EdgeInsets.all(20),
+                  child: Column(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: SizedBox(height: 300, width: 400, child: custom_map.Map(
+                          posDepart: LatLng(departAirport.latitude, departAirport.longitude),
+                          posArrivee: LatLng(arriveeAirport.latitude, arriveeAirport.longitude),
+                        )),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text("Informations du vol sélectionné : ", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),),
+                      ),
+                      Card(
+                        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                        child: Padding(
+                          padding: const EdgeInsets.all(20),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  const Icon(Icons.flight, color: Colors.deepOrangeAccent),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    compagnie?['nom_compagnie'] ?? "Compagnie ${flight.idCompagnie}",
+                                    style: const TextStyle(
+                                        fontWeight: FontWeight.bold, color: Colors.blueGrey),
+                                  ),
+                                ],
                               ),
-                            );
-                          },
-                          child: Text("Réserver"))
-                  ],
+                              const Divider(),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        const Text("DÉPART", style: TextStyle(
+                                            color: Colors.grey, fontSize: 10)),
+                                        Text(departAirport.nomAeroport,
+                                            style: const TextStyle(
+                                                fontWeight: FontWeight.bold)),
+                                        Text(departAirport.ville, style: const TextStyle(
+                                            color: Colors.blueGrey)),
+                                        Text(DateFormat('dd/MM/yyyy').format(flight.dateHeureDepart), style: const TextStyle(fontWeight: FontWeight.bold),),
+                                        Text(DateFormat.Hm().format(flight.dateHeureDepart), style: const TextStyle(fontWeight: FontWeight.bold),),
+                                      ],
+                                    ),
+                                  ),
+                                  const Icon(
+                                      Icons.arrow_forward_sharp, size: 16, color: Colors.grey),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.end,
+                                      children: [
+                                        const Text("ARRIVÉE", style: TextStyle(
+                                            color: Colors.grey, fontSize: 10)),
+                                        Text(arriveeAirport.nomAeroport,
+                                            style: const TextStyle(
+                                                fontWeight: FontWeight.bold)),
+                                        Text(arriveeAirport.ville, style: const TextStyle(
+                                            color: Colors.blueGrey)),
+                                        Text(DateFormat('dd/MM/yyyy').format(flight.dateHeureArrivee), style: const TextStyle(fontWeight: FontWeight.bold),),
+                                        Text(DateFormat.Hm().format(flight.dateHeureArrivee), style: const TextStyle(fontWeight: FontWeight.bold),),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      if (!unRetour)
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 24.0, horizontal: 16.0),
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 16),
+                              textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                            ),
+                            onPressed: () async {
+                              await FlightRepository().saveFlight(flight);
+                              if (allerFlight != null) {
+                                await FlightRepository().saveFlight(allerFlight!);
+                              }
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text("Vol(s) réservé(s) avec succès"),
+                                  backgroundColor: Colors.green,
+                                ),
+                              );
+                            },
+                            child: Text("Réserver"))
+                        )],
+                  ),
                 ),
               )),
               if (unRetour) ...[

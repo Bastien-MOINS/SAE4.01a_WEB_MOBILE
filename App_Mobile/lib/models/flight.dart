@@ -4,13 +4,15 @@ import 'package:app_mobile/screens/flight_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import '../repositories/flight_repository.dart';
+import 'package:app_mobile/screens/map.dart' as custom_map;
 import '../screens/main_screen.dart';
 import 'airport.dart';
 import 'api.dart';
 import 'package:intl/intl.dart';
-import 'package:app_mobile/screens/map.dart' as custom_map;
 import 'package:latlong2/latlong.dart';
 
+/// Représente un vol
+/// Implémente toutes les méthodes nécessaires ppur gérer les vols
 class Flight {
   int numeroVol;
   late DateTime dateHeureDepart;
@@ -40,7 +42,7 @@ class Flight {
     dateHeureDepart = DateTime.parse('$dateDepart $heureDepart');
     dateHeureArrivee = DateTime.parse('$dateArrivee $heureArrivee');
   }
-
+  /// Instancie un vol à partir de json
   factory Flight.fromJson(Map<String, dynamic> json) {
     return Flight(
         numeroVol: json['numero_vol'],
@@ -57,7 +59,7 @@ class Flight {
         longitude: (json['longitude'] ?? 0.0).toDouble()
     );
   }
-
+  /// Traduit un objet en json
   Map<String, dynamic> toJson() {
     return {
       'numero_vol': numeroVol,
@@ -74,37 +76,36 @@ class Flight {
       'longitude': longitude,
     };
   }
-
+  /// Retourne un widget Card
+  /// Le widget retourné affiche les informations liés au vol et permet sa réservation
   Widget toWidget(BuildContext context, Map<int, dynamic> airports, Map<int, dynamic> compagnies, {List<Flight>? returnFlights, Flight? allerFlight, bool onHome = false}) {
     final depart = airports[numeroAeroportDepart];
     final arrivee = airports[numeroAeroportArrivee];
     final compagnie = compagnies[idCompagnie];
 
-    return GestureDetector(
-      onTap: () {
-        if (!onHome) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) =>
-                FlightScreen(
-                  flight: this,
-                  departAirport: Airport.fromJson(depart),
-                  arriveeAirport: Airport.fromJson(arrivee),
-                  returnFlights: returnFlights,
-                  airportsMap: airports,
-                  compagniesMap: compagnies,
-                  allerFlight: allerFlight,
+    return Card(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: () {
+          if (!onHome) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) =>
+                  FlightScreen(
+                    flight: this,
+                    departAirport: Airport.fromJson(depart),
+                    arriveeAirport: Airport.fromJson(arrivee),
+                    returnFlights: returnFlights,
+                    airportsMap: airports,
+                    compagniesMap: compagnies,
+                    allerFlight: allerFlight,
+                  ),
                 ),
-            ),
-          );
-        }
-      },
-      child: Card(
-        elevation: 4,
-        margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(15)),
+            );
+          }
+        },
         child: Padding(
           padding: const EdgeInsets.all(20),
           child: Column(
@@ -129,7 +130,8 @@ class Flight {
                     const SizedBox(width: 8),
                     Text(
                       compagnie?['nom_compagnie'] ?? "Compagnie $idCompagnie",
-                      style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.blueGrey),
+                      style: const TextStyle(
+                          fontWeight: FontWeight.bold, color: Colors.blueGrey),
                     ),
                   ],
                 ),
@@ -141,30 +143,34 @@ class Flight {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const Text("DÉPART", style: TextStyle(
-                          color: Colors.grey, fontSize: 10)),
+                            color: Colors.grey, fontSize: 10)),
                         Text(depart?['nom_aeroport'] ??
-                          "ID $numeroAeroportDepart",
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold)),
+                            "ID $numeroAeroportDepart",
+                            style: const TextStyle(
+                                fontWeight: FontWeight.bold)),
                         Text(depart?['ville'] ?? "", style: const TextStyle(
-                          color: Colors.blueGrey)),
+                            color: Colors.blueGrey)),
+                        Text(DateFormat('dd/MM/yyyy').format(dateHeureDepart), style: const TextStyle(fontWeight: FontWeight.bold),),
+                        Text(DateFormat.Hm().format(dateHeureDepart), style: const TextStyle(fontWeight: FontWeight.bold),),
                       ],
                     ),
                   ),
                   const Icon(
-                    Icons.arrow_forward_ios, size: 16, color: Colors.grey),
+                      Icons.arrow_forward_ios, size: 16, color: Colors.grey),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
                         const Text("ARRIVÉE", style: TextStyle(
-                          color: Colors.grey, fontSize: 10)),
+                            color: Colors.grey, fontSize: 10)),
                         Text(arrivee?['nom_aeroport'] ??
-                          "ID $numeroAeroportArrivee",
+                            "ID $numeroAeroportArrivee",
                             style: const TextStyle(
-                              fontWeight: FontWeight.bold)),
+                                fontWeight: FontWeight.bold)),
                         Text(arrivee?['ville'] ?? "", style: const TextStyle(
-                          color: Colors.blueGrey)),
+                            color: Colors.blueGrey)),
+                        Text(DateFormat('dd/MM/yyyy').format(dateHeureArrivee), style: const TextStyle(fontWeight: FontWeight.bold),),
+                        Text(DateFormat.Hm().format(dateHeureArrivee), style: const TextStyle(fontWeight: FontWeight.bold),),
                       ],
                     ),
                   ),
@@ -179,8 +185,8 @@ class Flight {
                       await FlightRepository().AnnulOneVol(numeroVol);
                       if (!context.mounted) return;
                       Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => MainScreen())
+                          context,
+                          MaterialPageRoute(builder: (context) => MainScreen())
                       );
                     },
                     style: ElevatedButton.styleFrom(

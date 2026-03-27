@@ -1,13 +1,16 @@
-import 'package:app_mobile/screens/profil_screen.dart';
 import 'package:app_mobile/repositories/flight_repository.dart';
 import 'package:flutter/material.dart';
 import '../repositories/auth_repository.dart';
 import 'connection_screen.dart';
 import '../models/api.dart';
 
+/// Implémente la vue d'accueil de l'application
+/// Affiche la liste des vols réservés par l'utilisateur
 class HomeScreen extends StatelessWidget{
   FlightRepository flightRepository = FlightRepository();
 
+  /// Récupère l'ensemble des données nécessaires à l'affichage de la page
+  /// Retourne un [Future<Map<String, dynamic>>] contenant les vols, aéroports et compagnies
   Future<Map<String, dynamic>> _loadData() async {
     Api api = Api();
     final flights = await flightRepository.getSavedFlights();
@@ -20,8 +23,11 @@ class HomeScreen extends StatelessWidget{
     };
   }
 
+  /// Construit le widget [Scaffold] correspondant à la vue principale d'accueil
+  /// Gère l'attente et l'affichage des données via un [FutureBuilder]
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
       appBar: AppBar(
         toolbarHeight: 85,
