@@ -1,4 +1,5 @@
 from flask import jsonify, abort, make_response, request, url_for
+from sqlalchemy import text
 from .models import *
 from flask_restx import Resource, Namespace, fields
 from datetime import datetime
@@ -238,17 +239,93 @@ class VolCollection(Resource):
         ville_arrivee = request.args.get('villeArrivee', type=str)
         date_depart = request.args.get('DateDepart', type=str)
         date_retour = request.args.get('DateRetour', type=str)
-        
-        if not ville_depart and not ville_arrivee and not date_depart and not date_retour:
-            vols = get_all_vols()
-            return api.marshal(vols, vol_model)
+        corr = request.args.get('correspondence', 'direct', type=str) # 'direct', 'one', or 'two'
+        print(corr)
+
+        if corr == 'direct':
+            # On ajoute une condition pour gérer les champs vides
+            query = """
+                SELECT V.*        FROM VOL V
+                JOIN AEROPORT A1 ON V.numero_aeroport_dep = A1.numero_aeroport
+                JOIN AEROPORT A2 ON V.numero_aeroport_arr = A2.numero_aeroport
+                WHERE (:dep = '' OR A1.ville = :dep) 
+                  AND (:arr = '' OR A2.ville = :arr)
+            """
+            resultats = db.session.execute(text(query), {"dep": ville_depart or '', "arr": ville_arrivee or ''}).fetchall()
+            vols = [dict(row._mapping) for row in resultats]
+            return {"aller": api.marshal(vols, vol_model)}
+
+        elif corr == 'one':
+            query = """
+                SELECT V1.numero_vol as v1_num, V2.numero_vol as v2_num
+                FROM VOL V1
+                JOIN VOL V2 ON V1.numero_aeroport_arr = V2.numero_aeroport_dep
+                JOIN AEROPORT A1 ON V1.numero_aeroport_dep = A1.numero_aeroport
+                JOIN AEROPORT A2 ON V2.numero_aeroport_arr = A2.numero_aeroport
+                WHERE (:dep = '' OR A1.ville = :dep) 
+                  AND (:arr = '' OR A2.ville = :arr)
+                  AND (V2.date_debut > V1.date_arrivee OR (V2.date_debut = V1.date_arrivee AND V2.heure_debut > V1.heure_arrivee))
+                  AND V1.numero_aeroport_dep != V2.numero_aeroport_arr
+            """
+            resultats = db.session.execute(text(query), {"dep": ville_depart or '', "arr": ville_arrivee or ''}).fetchall()
+            vols_res = []
+            for row in resultats:
+                # On récupère les objets complets
+                v1 = Vol.query.get(row.v1_num)
+                v2 = Vol.query.get(row.v2_num)
+                # On crée un "trip" (liste de vols)
+                trip = [api.marshal(v1, vol_model), api.marshal(v2, vol_model)]
+                vols_res.append(trip)
+            return {"aller": vols_res}
+
+        elif corr == 'two':
+            query = """
+                SELECT V1.numero_vol as v1_num, V2.numero_vol as v2_num, V3.numero_vol as v3_num
+                FROM VOL V1
+                JOIN AEROPORT A1 ON V1.numero_aeroport_dep = A1.numero_aeroport
+                JOIN VOL V2 ON V1.numero_aeroport_arr = V2.numero_aeroport_dep
+                JOIN VOL V3 ON V2.numero_aeroport_arr = V3.numero_aeroport_dep
+                JOIN AEROPORT A2 ON V3.numero_aeroport_arr = A2.numero_aeroport
+                WHERE (:dep = '' OR A1.ville LIKE :dep_pattern) 
+                AND (:arr = '' OR A2.ville LIKE :arr_pattern)
+
+                -- Empêcher de repasser par le même aéroport
+                AND V1.numero_aeroport_dep != V2.numero_aeroport_arr
+                AND V1.numero_aeroport_dep != V3.numero_aeroport_arr
+                AND V1.numero_aeroport_arr != V3.numero_aeroport_arr
+
+                -- Correspondance 1 (V1 -> V2) : après l'arrivée et dans les 24h
+                AND (V2.date_debut > V1.date_arrivee OR (V2.date_debut = V1.date_arrivee AND V2.heure_debut > V1.heure_arrivee))
+                AND (V2.date_debut < date(V1.date_arrivee, '+1 day') OR (V2.date_debut = date(V1.date_arrivee, '+1 day') AND V2.heure_debut <= V1.heure_arrivee))
+
+                -- Correspondance 2 (V2 -> V3) : après l'arrivée et dans les 24h
+                AND (V3.date_debut > V2.date_arrivee OR (V3.date_debut = V2.date_arrivee AND V3.heure_debut > V2.heure_arrivee))
+                AND (V3.date_debut < date(V2.date_arrivee, '+1 day') OR (V3.date_debut = date(V2.date_arrivee, '+1 day') AND V3.heure_debut <= V2.heure_arrivee))
+            """
             
-        if date_retour:
-            resultats = get_vols_filtered(ville_depart, ville_arrivee, date_depart, date_retour)
-            return api.marshal(resultats, vol_search_model)
-            
-        vols = get_vols_filtered(ville_depart, ville_arrivee, date_depart, None)
-        return api.marshal(vols, vol_model)
+            params = {
+                "dep": ville_depart or '',
+                "dep_pattern": f"%{ville_depart}%" if ville_depart else '',
+                "arr": ville_arrivee or '',
+                "arr_pattern": f"%{ville_arrivee}%" if ville_arrivee else ''
+            }
+
+            resultats = db.session.execute(text(query), params).fetchall()
+
+            vols_res = []
+            for row in resultats:
+                v1 = Vol.query.get(row.v1_num)
+                v2 = Vol.query.get(row.v2_num)
+                v3 = Vol.query.get(row.v3_num)
+                # On marshal chaque vol pour avoir l'objet JSON complet
+                trip = [api.marshal(v1, vol_model), api.marshal(v2, vol_model), api.marshal(v3, vol_model)]
+                vols_res.append(trip)
+
+            return {"aller": vols_res}
+
+        # Fallback par défaut (toujours avec la clé "aller")
+        vols = get_vols_filtered(ville_depart, ville_arrivee, date_depart, date_retour)
+        return {"aller": api.marshal(vols, vol_model)}
 
     @ns_vol.doc('create_vol')
     @ns_vol.expect(vol_input_model, validate=True)
