@@ -1,9 +1,12 @@
 import 'package:app_mobile/models/airport.dart';
+import 'package:app_mobile/screens/search_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:intl/intl.dart';
 import '../models/flight.dart';
+import '../repositories/auth_repository.dart';
 import '../repositories/flight_repository.dart';
+import 'connection_screen.dart';
 import 'map.dart' as custom_map;
 import 'package:latlong2/latlong.dart';
 /// Implémente la vue de détail d'un vol
@@ -132,16 +135,32 @@ class FlightScreen extends StatelessWidget{
                               textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                             ),
                             onPressed: () async {
-                              await FlightRepository().saveFlight(flight);
-                              if (allerFlight != null) {
-                                await FlightRepository().saveFlight(allerFlight!);
+                              if (await AuthRepository().isConnected()) {
+                                await FlightRepository().saveFlight(flight);
+                                if (allerFlight != null) {
+                                  await FlightRepository().saveFlight(
+                                      allerFlight!);
+                                }Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => SearchScreen(),
+                                    )
+                                );
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text(
+                                        "Vol(s) réservé(s) avec succès"),
+                                    backgroundColor: Colors.green,
+                                  ),
+                                );
+                              } else {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => InscrConectScreen(),
+                                  )
+                                );
                               }
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text("Vol(s) réservé(s) avec succès"),
-                                  backgroundColor: Colors.green,
-                                ),
-                              );
                             },
                             child: Text("Réserver"))
                         )],

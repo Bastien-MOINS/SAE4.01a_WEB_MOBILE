@@ -1,9 +1,17 @@
+import 'package:app_mobile/main.dart';
 import 'package:app_mobile/models/api.dart';
 import 'package:app_mobile/screens/flight_screen.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import '../repositories/auth_repository.dart';
+import '../repositories/flight_repository.dart';
+import 'package:app_mobile/screens/map.dart' as custom_map;
+import '../screens/main_screen.dart';
 import 'airport.dart';
 import 'api.dart';
 import 'package:intl/intl.dart';
+import 'package:latlong2/latlong.dart';
+
 /// Représente un vol
 /// Implémente toutes les méthodes nécessaires ppur gérer les vols
 class Flight {
@@ -71,7 +79,7 @@ class Flight {
   }
   /// Retourne un widget Card
   /// Le widget retourné affiche les informations liés au vol et permet sa réservation
-  Widget toWidget(BuildContext context, Map<int, dynamic> airports, Map<int, dynamic> compagnies, {List<Flight>? returnFlights, Flight? allerFlight}) {
+  Widget toWidget(BuildContext context, Map<int, dynamic> airports, Map<int, dynamic> compagnies, {List<Flight>? returnFlights, Flight? allerFlight, bool onHome = false}) {
     final depart = airports[numeroAeroportDepart];
     final arrivee = airports[numeroAeroportArrivee];
     final compagnie = compagnies[idCompagnie];
@@ -81,37 +89,53 @@ class Flight {
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => FlightScreen(
-                flight: this,
-                departAirport: Airport.fromJson(depart),
-                arriveeAirport: Airport.fromJson(arrivee),
-                returnFlights: returnFlights,
-                airportsMap: airports,
-                compagniesMap: compagnies,
-                allerFlight: allerFlight,
-              ),
-            ),
-          );
+          if (!onHome) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) =>
+                  FlightScreen(
+                    flight: this,
+                    departAirport: Airport.fromJson(depart),
+                    arriveeAirport: Airport.fromJson(arrivee),
+                    returnFlights: returnFlights,
+                    airportsMap: airports,
+                    compagniesMap: compagnies,
+                    allerFlight: allerFlight,
+                  ),
+                ),
+            );
+          }
         },
         child: Padding(
           padding: const EdgeInsets.all(20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                children: [
-                  const Icon(Icons.flight_takeoff, color: Colors.blue),
-                  const SizedBox(width: 8),
-                  Text(
-                    compagnie?['nom_compagnie'] ?? "Compagnie $idCompagnie",
-                    style: const TextStyle(
-                        fontWeight: FontWeight.bold, color: Colors.blueGrey),
+              if (onHome)
+                SizedBox(
+                  height: 150,
+                  width: double.infinity,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(10),
+                    child: custom_map.Map(
+                      posDepart: LatLng(Airport.fromJson(depart).latitude, Airport.fromJson(depart).longitude),
+                      posArrivee: LatLng(Airport.fromJson(arrivee).latitude, Airport.fromJson(arrivee).longitude),
+                    ),
                   ),
-                ],
-              ),
+                )
+              else
+                Row(
+                  children: [
+                    const Icon(Icons.flight_takeoff, color: Colors.blue),
+                    const SizedBox(width: 8),
+                    Text(
+                      compagnie?['nom_compagnie'] ?? "Compagnie $idCompagnie",
+                      style: const TextStyle(
+                          fontWeight: FontWeight.bold, color: Colors.blueGrey),
+                    ),
+                  ],
+                ),
               const Divider(),
               Row(
                 children: [
@@ -153,6 +177,33 @@ class Flight {
                   ),
                 ],
               ),
+              if (onHome) ...[
+                const SizedBox(height: 10),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () async{
+                      await FlightRepository().AnnulOneVol(numeroVol);
+                      if (!context.mounted) return;
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => MainScreen())
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.red[800],
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                    child: const Text(
+                      "Annuler le vol",
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ),
+              ],
             ],
           ),
         ),

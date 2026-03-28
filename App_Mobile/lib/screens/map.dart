@@ -69,7 +69,7 @@ class Map extends StatelessWidget {
               child: const Icon(Icons.location_pin, color: Colors.red),
             ),Marker(
               point: posDepart,
-              child: const Icon(Icons.circle, color: Colors.black, size: 12,),
+              child: const Icon(Icons.flight_takeoff_outlined, color: Colors.black, size: 30,),
             ),
           ],
         ),

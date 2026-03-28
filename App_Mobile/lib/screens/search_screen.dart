@@ -2,6 +2,7 @@ import 'package:app_mobile/models/flight.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../models/api.dart';
+import '../repositories/auth_repository.dart';
 /// Implémente la vue de recherche de vol avec filtres
 class SearchScreen extends StatefulWidget {
   const SearchScreen({super.key});
@@ -72,6 +73,19 @@ class _SearchScreenState extends State<SearchScreen> {
       body: CustomScrollView(
         slivers: [
           appBar(),
+          FutureBuilder<bool>(
+            future: AuthRepository().isConnected(),
+            builder: (context, snapshot) {
+              var isConnected = snapshot.hasData && snapshot.data == true;
+              return SliverToBoxAdapter(
+                child: Center(child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text(isConnected ? "Connecté - Prochains vols" : "Veuillez vous connecter pour réserver un vol",
+                  style: TextStyle(fontWeight: FontWeight.bold),),
+                )),
+              );
+            },
+          ),
           if (_isLoading)
             SliverFillRemaining(
               child: Center(child: CircularProgressIndicator()),
