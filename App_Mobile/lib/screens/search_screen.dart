@@ -231,10 +231,10 @@ class _SearchScreenState extends State<SearchScreen> {
                       print(e);
                     }
                   },
-                  children: const <Correspondence, Widget>{
-                    Correspondence.direct: Text('Direct'),
-                    Correspondence.one: Text('1 escale'),
-                    Correspondence.two: Text('2 escales'),
+                  children: <Correspondence, Widget>{
+                    Correspondence.direct: Text('Direct', style: TextStyle(color: _selectedSegment == Correspondence.direct ? Colors.black : Colors.white),),
+                    Correspondence.one: Text('1 escale', style: TextStyle(color: _selectedSegment == Correspondence.one ? Colors.black : Colors.white),),
+                    Correspondence.two: Text('2 escales', style: TextStyle(color: _selectedSegment == Correspondence.two ? Colors.black : Colors.white),),
                   },
                 ),
               ),

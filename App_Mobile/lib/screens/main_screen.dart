@@ -25,11 +25,11 @@ class _MainScreenState extends State<MainScreen>{
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.blue,
+          seedColor: Colors.blue.shade900,
         ),
         scaffoldBackgroundColor: Colors.white,
-        appBarTheme: const AppBarTheme(
-          backgroundColor: Colors.blue,
+        appBarTheme: AppBarTheme(
+          backgroundColor: Colors.blue.shade900,
           foregroundColor: Colors.white,
         ),
         cardTheme: CardThemeData(
