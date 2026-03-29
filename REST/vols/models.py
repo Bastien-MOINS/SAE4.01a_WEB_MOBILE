@@ -251,7 +251,7 @@ def get_all_vols():
     return Vol.query.filter(Vol.date_debut >= date.today()).all()
 
 def get_vols_filtered(ville_depart=None, ville_arrivee=None, date_depart=None, date_retour=None):
-    query_aller = Vol.query
+    query_aller = Vol.query.filter(Vol.date_debut >= date.today())
     
     if ville_depart:
         villes_dep = db.session.query(Aeroport.numero_aeroport).filter(Aeroport.ville.ilike(f'%{ville_depart}%'))
@@ -269,7 +269,7 @@ def get_vols_filtered(ville_depart=None, ville_arrivee=None, date_depart=None, d
     if not date_retour:
         return vols_aller
 
-    query_retour = Vol.query
+    query_retour = Vol.query.filter(Vol.date_debut >= date.today())
     
     if ville_arrivee: 
         villes_dep_retour = db.session.query(Aeroport.numero_aeroport).filter(Aeroport.ville.ilike(f'%{ville_arrivee}%'))

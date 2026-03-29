@@ -250,9 +250,28 @@ class VolCollection(Resource):
                 JOIN AEROPORT A2 ON V.numero_aeroport_arr = A2.numero_aeroport
                 WHERE (:dep = '' OR A1.ville = :dep) 
                   AND (:arr = '' OR A2.ville = :arr)
+                  AND V.date_debut >= DATE('now', 'localtime')
+                  AND (:date_dep = '' OR V.date_debut = :date_dep)
             """
-            resultats = db.session.execute(text(query), {"dep": ville_depart or '', "arr": ville_arrivee or ''}).fetchall()
+            resultats = db.session.execute(text(query), {"dep": ville_depart or '', "arr": ville_arrivee or '', "date_dep": date_depart or ''}).fetchall()
             vols = [dict(row._mapping) for row in resultats]
+            
+            # Recherche des vols retour si une date de retour est fournie
+            vols_retour = []
+            if date_retour:
+                query_retour = """
+                    SELECT V.*        FROM VOL V
+                    JOIN AEROPORT A1 ON V.numero_aeroport_dep = A1.numero_aeroport
+                    JOIN AEROPORT A2 ON V.numero_aeroport_arr = A2.numero_aeroport
+                    WHERE (:dep = '' OR A2.ville = :dep) 
+                      AND (:arr = '' OR A1.ville = :arr)
+                      AND V.date_debut >= DATE('now', 'localtime')
+                      AND V.date_debut = :date_ret
+                """
+                resultats_retour = db.session.execute(text(query_retour), {"dep": ville_depart or '', "arr": ville_arrivee or '', "date_ret": date_retour}).fetchall()
+                vols_retour = [dict(row._mapping) for row in resultats_retour]
+                return {"aller": api.marshal(vols, vol_model), "retour": api.marshal(vols_retour, vol_model)}
+                
             return {"aller": api.marshal(vols, vol_model)}
 
         elif corr == 'one':
@@ -264,10 +283,12 @@ class VolCollection(Resource):
                 JOIN AEROPORT A2 ON V2.numero_aeroport_arr = A2.numero_aeroport
                 WHERE (:dep = '' OR A1.ville = :dep) 
                   AND (:arr = '' OR A2.ville = :arr)
+                  AND V1.date_debut >= DATE('now', 'localtime')
+                  AND (:date_dep = '' OR V1.date_debut = :date_dep)
                   AND (V2.date_debut > V1.date_arrivee OR (V2.date_debut = V1.date_arrivee AND V2.heure_debut > V1.heure_arrivee))
                   AND V1.numero_aeroport_dep != V2.numero_aeroport_arr
             """
-            resultats = db.session.execute(text(query), {"dep": ville_depart or '', "arr": ville_arrivee or ''}).fetchall()
+            resultats = db.session.execute(text(query), {"dep": ville_depart or '', "arr": ville_arrivee or '', "date_dep": date_depart or ''}).fetchall()
             vols_res = []
             for row in resultats:
                 # On récupère les objets complets
@@ -276,6 +297,31 @@ class VolCollection(Resource):
                 # On crée un "trip" (liste de vols)
                 trip = [api.marshal(v1, vol_model), api.marshal(v2, vol_model)]
                 vols_res.append(trip)
+            
+            # Recherche des vols retour si une date de retour est fournie
+            vols_retour_res = []
+            if date_retour:
+                query_retour = """
+                    SELECT V1.numero_vol as v1_num, V2.numero_vol as v2_num
+                    FROM VOL V1
+                    JOIN VOL V2 ON V1.numero_aeroport_arr = V2.numero_aeroport_dep
+                    JOIN AEROPORT A1 ON V1.numero_aeroport_dep = A1.numero_aeroport
+                    JOIN AEROPORT A2 ON V2.numero_aeroport_arr = A2.numero_aeroport
+                    WHERE (:dep = '' OR A2.ville = :dep) 
+                      AND (:arr = '' OR A1.ville = :arr)
+                      AND V1.date_debut >= DATE('now', 'localtime')
+                      AND V1.date_debut = :date_ret
+                      AND (V2.date_debut > V1.date_arrivee OR (V2.date_debut = V1.date_arrivee AND V2.heure_debut > V1.heure_arrivee))
+                      AND V1.numero_aeroport_dep != V2.numero_aeroport_arr
+                """
+                resultats_retour = db.session.execute(text(query_retour), {"dep": ville_depart or '', "arr": ville_arrivee or '', "date_ret": date_retour}).fetchall()
+                for row in resultats_retour:
+                    v1 = Vol.query.get(row.v1_num)
+                    v2 = Vol.query.get(row.v2_num)
+                    trip = [api.marshal(v1, vol_model), api.marshal(v2, vol_model)]
+                    vols_retour_res.append(trip)
+                return {"aller": vols_res, "retour": vols_retour_res}
+
             return {"aller": vols_res}
 
         elif corr == 'two':
@@ -288,6 +334,8 @@ class VolCollection(Resource):
                 JOIN AEROPORT A2 ON V3.numero_aeroport_arr = A2.numero_aeroport
                 WHERE (:dep = '' OR A1.ville LIKE :dep_pattern) 
                 AND (:arr = '' OR A2.ville LIKE :arr_pattern)
+                AND V1.date_debut >= DATE('now', 'localtime')
+                AND (:date_dep = '' OR V1.date_debut = :date_dep)
 
                 -- Empêcher de repasser par le même aéroport
                 AND V1.numero_aeroport_dep != V2.numero_aeroport_arr
@@ -307,7 +355,8 @@ class VolCollection(Resource):
                 "dep": ville_depart or '',
                 "dep_pattern": f"%{ville_depart}%" if ville_depart else '',
                 "arr": ville_arrivee or '',
-                "arr_pattern": f"%{ville_arrivee}%" if ville_arrivee else ''
+                "arr_pattern": f"%{ville_arrivee}%" if ville_arrivee else '',
+                "date_dep": date_depart or ''
             }
 
             resultats = db.session.execute(text(query), params).fetchall()
@@ -320,6 +369,51 @@ class VolCollection(Resource):
                 # On marshal chaque vol pour avoir l'objet JSON complet
                 trip = [api.marshal(v1, vol_model), api.marshal(v2, vol_model), api.marshal(v3, vol_model)]
                 vols_res.append(trip)
+                
+            vols_retour_res = []
+            if date_retour:
+                query_retour = """
+                    SELECT V1.numero_vol as v1_num, V2.numero_vol as v2_num, V3.numero_vol as v3_num
+                    FROM VOL V1
+                    JOIN AEROPORT A1 ON V1.numero_aeroport_dep = A1.numero_aeroport
+                    JOIN VOL V2 ON V1.numero_aeroport_arr = V2.numero_aeroport_dep
+                    JOIN VOL V3 ON V2.numero_aeroport_arr = V3.numero_aeroport_dep
+                    JOIN AEROPORT A2 ON V3.numero_aeroport_arr = A2.numero_aeroport
+                    WHERE (:dep = '' OR A2.ville LIKE :dep_pattern) 
+                    AND (:arr = '' OR A1.ville LIKE :arr_pattern)
+                    AND V1.date_debut >= DATE('now', 'localtime')
+                    AND V1.date_debut = :date_ret
+    
+                    -- Empêcher de repasser par le même aéroport
+                    AND V1.numero_aeroport_dep != V2.numero_aeroport_arr
+                    AND V1.numero_aeroport_dep != V3.numero_aeroport_arr
+                    AND V1.numero_aeroport_arr != V3.numero_aeroport_arr
+    
+                    -- Correspondance 1 (V1 -> V2) : après l'arrivée et dans les 24h
+                    AND (V2.date_debut > V1.date_arrivee OR (V2.date_debut = V1.date_arrivee AND V2.heure_debut > V1.heure_arrivee))
+                    AND (V2.date_debut < date(V1.date_arrivee, '+1 day') OR (V2.date_debut = date(V1.date_arrivee, '+1 day') AND V2.heure_debut <= V1.heure_arrivee))
+    
+                    -- Correspondance 2 (V2 -> V3) : après l'arrivée et dans les 24h
+                    AND (V3.date_debut > V2.date_arrivee OR (V3.date_debut = V2.date_arrivee AND V3.heure_debut > V2.heure_arrivee))
+                    AND (V3.date_debut < date(V2.date_arrivee, '+1 day') OR (V3.date_debut = date(V2.date_arrivee, '+1 day') AND V3.heure_debut <= V2.heure_arrivee))
+                """
+                
+                params_retour = {
+                    "dep": ville_depart or '',
+                    "dep_pattern": f"%{ville_depart}%" if ville_depart else '',
+                    "arr": ville_arrivee or '',
+                    "arr_pattern": f"%{ville_arrivee}%" if ville_arrivee else '',
+                    "date_ret": date_retour or ''
+                }
+    
+                resultats_retour = db.session.execute(text(query_retour), params_retour).fetchall()
+                for row in resultats_retour:
+                    v1 = Vol.query.get(row.v1_num)
+                    v2 = Vol.query.get(row.v2_num)
+                    v3 = Vol.query.get(row.v3_num)
+                    trip = [api.marshal(v1, vol_model), api.marshal(v2, vol_model), api.marshal(v3, vol_model)]
+                    vols_retour_res.append(trip)
+                return {"aller": vols_res, "retour": vols_retour_res}
 
             return {"aller": vols_res}
 

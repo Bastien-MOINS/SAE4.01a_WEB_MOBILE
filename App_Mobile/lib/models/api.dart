@@ -39,6 +39,7 @@ class Api {
     if (response.statusCode == 200) {
       dynamic json = jsonDecode(response.body);
       final aller = <List<Flight>>[];
+      final retour = <List<Flight>>[];
 
       // Fonction helper pour transformer le JSON en List de List
       List<Flight> parseTrip(dynamic item) {
@@ -48,12 +49,19 @@ class Api {
         return [Flight.fromJson(item)];
       }
 
-      if (json is Map && json['aller'] != null) {
-        for (var trip in json['aller']) {
-          aller.add(parseTrip(trip));
+      if (json is Map) {
+        if (json['aller'] != null) {
+          for (var trip in json['aller']) {
+            aller.add(parseTrip(trip));
+          }
+        }
+        if (json['retour'] != null) {
+          for (var trip in json['retour']) {
+            retour.add(parseTrip(trip));
+          }
         }
       }
-      return {'aller': aller, 'retour': []};
+      return {'aller': aller, 'retour': retour};
     } else {
       throw Exception('Failed to load flights');
     }

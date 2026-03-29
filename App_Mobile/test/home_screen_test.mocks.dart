@@ -7,8 +7,9 @@ import 'dart:async' as _i4;
 
 import 'package:app_mobile/models/airport.dart' as _i2;
 import 'package:app_mobile/models/api.dart' as _i6;
+import 'package:app_mobile/models/correspondence.dart' as _i8;
 import 'package:app_mobile/models/flight.dart' as _i5;
-import 'package:app_mobile/repositories/auth_repository.dart' as _i8;
+import 'package:app_mobile/repositories/auth_repository.dart' as _i9;
 import 'package:app_mobile/repositories/flight_repository.dart' as _i3;
 import 'package:mockito/mockito.dart' as _i1;
 import 'package:mockito/src/dummies.dart' as _i7;
@@ -100,11 +101,12 @@ class MockApi extends _i1.Mock implements _i6.Api {
   );
 
   @override
-  _i4.Future<Map<String, List<_i5.Flight>>> getFlights({
+  _i4.Future<Map<String, List<List<_i5.Flight>>>> getFlights({
     String? villeDepart,
     String? villeArrivee,
     String? dateDepart,
     String? dateRetour,
+    _i8.Correspondence? correspondence,
   }) =>
       (super.noSuchMethod(
             Invocation.method(#getFlights, [], {
@@ -112,12 +114,13 @@ class MockApi extends _i1.Mock implements _i6.Api {
               #villeArrivee: villeArrivee,
               #dateDepart: dateDepart,
               #dateRetour: dateRetour,
+              #correspondence: correspondence,
             }),
-            returnValue: _i4.Future<Map<String, List<_i5.Flight>>>.value(
-              <String, List<_i5.Flight>>{},
+            returnValue: _i4.Future<Map<String, List<List<_i5.Flight>>>>.value(
+              <String, List<List<_i5.Flight>>>{},
             ),
           )
-          as _i4.Future<Map<String, List<_i5.Flight>>>);
+          as _i4.Future<Map<String, List<List<_i5.Flight>>>>);
 
   @override
   _i4.Future<Map<int, dynamic>> getAirportsMap() =>
@@ -149,7 +152,7 @@ class MockApi extends _i1.Mock implements _i6.Api {
 /// A class which mocks [AuthRepository].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockAuthRepository extends _i1.Mock implements _i8.AuthRepository {
+class MockAuthRepository extends _i1.Mock implements _i9.AuthRepository {
   MockAuthRepository() {
     _i1.throwOnMissingStub(this);
   }

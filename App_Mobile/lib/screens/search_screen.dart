@@ -46,6 +46,7 @@ class _SearchScreenState extends State<SearchScreen> {
         villeDepart: _departureController.text,
         villeArrivee: _arrivalController.text,
         dateDepart: _dateDepart?.toIso8601String().substring(0, 10),
+        dateRetour: _dateRetour?.toIso8601String().substring(0, 10),
         correspondence: _selectedSegment,
       );
 
@@ -55,6 +56,7 @@ class _SearchScreenState extends State<SearchScreen> {
 
       setState(() {
         _flights = results['aller'] ?? [];
+        _retourFlights = results['retour'] ?? [];
         _airports = airports;
         _compagnies = compagnies;
         _isLoading = false;
@@ -154,7 +156,7 @@ class _SearchScreenState extends State<SearchScreen> {
                           },
                           itemBuilder: (context, i) {
                             // Reuse your existing toWidget but with smaller margins if needed
-                            return trip[i].toWidget(context, _airports, _compagnies);
+                            return trip[i].toWidget(context, _airports, _compagnies, returnFlights: _retourFlights.expand((e) => e).toList());
                           },
                         ),
                       ],

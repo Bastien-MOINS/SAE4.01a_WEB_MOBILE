@@ -170,10 +170,15 @@ def syncdb():
                 heure_arr += 1
                 minute_arr -= 60
                 
+            date_arr = date_vol
+            if heure_arr >= 24:
+                heure_arr -= 24
+                date_arr = date_vol + timedelta(days=1)
+                
             vol = Vol(
                 date_debut=date_vol,
                 heure_debut=time(heure, minute),
-                date_arrivee=date_vol,
+                date_arrivee=date_arr,
                 heure_arrivee=time(heure_arr, minute_arr),
                 id_compagnie=compagnie.id_compagnie,
                 numero_aeroport_dep=aero_dep.numero_aeroport,
@@ -199,6 +204,45 @@ def syncdb():
     ]
     
     db.session.add_all(vols_speciaux)
+    db.session.commit()
+
+    # --- 7. Ajouter une vingtaine de vols en mai et juin 2026 ---
+    vols_mai_juin = [
+        Vol(numero_vol=3001, date_debut=date(2026, 5, 2), heure_debut=time(8, 0), date_arrivee=date(2026, 5, 2), heure_arrivee=time(10, 0), id_compagnie=air_france.id_compagnie, numero_aeroport_dep=cdg.numero_aeroport, id_terminal_dep=t1_cdg.id_terminal, numero_aeroport_arr=nice.numero_aeroport, id_terminal_arr=t_nice.id_terminal),
+        Vol(numero_vol=3002, date_debut=date(2026, 5, 6), heure_debut=time(10, 30), date_arrivee=date(2026, 5, 6), heure_arrivee=time(12, 15), id_compagnie=lufthansa.id_compagnie, numero_aeroport_dep=frankfurt.numero_aeroport, id_terminal_dep=t_frank.id_terminal, numero_aeroport_arr=lyon.numero_aeroport, id_terminal_arr=t_lyon.id_terminal),
+        Vol(numero_vol=3003, date_debut=date(2026, 5, 10), heure_debut=time(14, 0), date_arrivee=date(2026, 5, 10), heure_arrivee=time(15, 30), id_compagnie=ryanair.id_compagnie, numero_aeroport_dep=berlin.numero_aeroport, id_terminal_dep=t_berlin.id_terminal, numero_aeroport_arr=orly.numero_aeroport, id_terminal_arr=t_orly.id_terminal),
+        Vol(numero_vol=3004, date_debut=date(2026, 5, 12), heure_debut=time(9, 15), date_arrivee=date(2026, 5, 12), heure_arrivee=time(11, 0), id_compagnie=air_france.id_compagnie, numero_aeroport_dep=lyon.numero_aeroport, id_terminal_dep=t_lyon.id_terminal, numero_aeroport_arr=cdg.numero_aeroport, id_terminal_arr=t2_cdg.id_terminal),
+        Vol(numero_vol=3005, date_debut=date(2026, 5, 16), heure_debut=time(17, 45), date_arrivee=date(2026, 5, 16), heure_arrivee=time(19, 30), id_compagnie=lufthansa.id_compagnie, numero_aeroport_dep=frankfurt.numero_aeroport, id_terminal_dep=t_frank.id_terminal, numero_aeroport_arr=nice.numero_aeroport, id_terminal_arr=t_nice.id_terminal),
+        Vol(numero_vol=3006, date_debut=date(2026, 5, 18), heure_debut=time(6, 30), date_arrivee=date(2026, 5, 18), heure_arrivee=time(8, 0), id_compagnie=ryanair.id_compagnie, numero_aeroport_dep=orly.numero_aeroport, id_terminal_dep=t_orly.id_terminal, numero_aeroport_arr=berlin.numero_aeroport, id_terminal_arr=t_berlin.id_terminal),
+        Vol(numero_vol=3007, date_debut=date(2026, 5, 22), heure_debut=time(12, 0), date_arrivee=date(2026, 5, 22), heure_arrivee=time(13, 15), id_compagnie=air_france.id_compagnie, numero_aeroport_dep=nice.numero_aeroport, id_terminal_dep=t_nice.id_terminal, numero_aeroport_arr=lyon.numero_aeroport, id_terminal_arr=t_lyon.id_terminal),
+        Vol(numero_vol=3008, date_debut=date(2026, 5, 25), heure_debut=time(16, 10), date_arrivee=date(2026, 5, 25), heure_arrivee=time(18, 0), id_compagnie=lufthansa.id_compagnie, numero_aeroport_dep=berlin.numero_aeroport, id_terminal_dep=t_berlin.id_terminal, numero_aeroport_arr=frankfurt.numero_aeroport, id_terminal_arr=t_frank.id_terminal),
+        Vol(numero_vol=3009, date_debut=date(2026, 5, 28), heure_debut=time(20, 0), date_arrivee=date(2026, 5, 28), heure_arrivee=time(21, 30), id_compagnie=ryanair.id_compagnie, numero_aeroport_dep=cdg.numero_aeroport, id_terminal_dep=t1_cdg.id_terminal, numero_aeroport_arr=orly.numero_aeroport, id_terminal_arr=t_orly.id_terminal),
+        Vol(numero_vol=3010, date_debut=date(2026, 5, 30), heure_debut=time(8, 45), date_arrivee=date(2026, 5, 30), heure_arrivee=time(10, 30), id_compagnie=air_france.id_compagnie, numero_aeroport_dep=lyon.numero_aeroport, id_terminal_dep=t_lyon.id_terminal, numero_aeroport_arr=frankfurt.numero_aeroport, id_terminal_arr=t_frank.id_terminal),
+        Vol(numero_vol=3011, date_debut=date(2026, 6, 2), heure_debut=time(9, 30), date_arrivee=date(2026, 6, 2), heure_arrivee=time(11, 0), id_compagnie=lufthansa.id_compagnie, numero_aeroport_dep=frankfurt.numero_aeroport, id_terminal_dep=t_frank.id_terminal, numero_aeroport_arr=berlin.numero_aeroport, id_terminal_arr=t_berlin.id_terminal),
+        Vol(numero_vol=3012, date_debut=date(2026, 6, 5), heure_debut=time(13, 15), date_arrivee=date(2026, 6, 5), heure_arrivee=time(14, 45), id_compagnie=ryanair.id_compagnie, numero_aeroport_dep=orly.numero_aeroport, id_terminal_dep=t_orly.id_terminal, numero_aeroport_arr=nice.numero_aeroport, id_terminal_arr=t_nice.id_terminal),
+        Vol(numero_vol=3013, date_debut=date(2026, 6, 9), heure_debut=time(7, 0), date_arrivee=date(2026, 6, 9), heure_arrivee=time(8, 30), id_compagnie=air_france.id_compagnie, numero_aeroport_dep=nice.numero_aeroport, id_terminal_dep=t_nice.id_terminal, numero_aeroport_arr=cdg.numero_aeroport, id_terminal_arr=t2_cdg.id_terminal),
+        Vol(numero_vol=3014, date_debut=date(2026, 6, 12), heure_debut=time(11, 20), date_arrivee=date(2026, 6, 12), heure_arrivee=time(13, 0), id_compagnie=lufthansa.id_compagnie, numero_aeroport_dep=berlin.numero_aeroport, id_terminal_dep=t_berlin.id_terminal, numero_aeroport_arr=lyon.numero_aeroport, id_terminal_arr=t_lyon.id_terminal),
+        Vol(numero_vol=3015, date_debut=date(2026, 6, 16), heure_debut=time(15, 45), date_arrivee=date(2026, 6, 16), heure_arrivee=time(17, 30), id_compagnie=ryanair.id_compagnie, numero_aeroport_dep=lyon.numero_aeroport, id_terminal_dep=t_lyon.id_terminal, numero_aeroport_arr=frankfurt.numero_aeroport, id_terminal_arr=t_frank.id_terminal),
+        Vol(numero_vol=3016, date_debut=date(2026, 6, 20), heure_debut=time(18, 30), date_arrivee=date(2026, 6, 20), heure_arrivee=time(20, 0), id_compagnie=air_france.id_compagnie, numero_aeroport_dep=cdg.numero_aeroport, id_terminal_dep=t1_cdg.id_terminal, numero_aeroport_arr=berlin.numero_aeroport, id_terminal_arr=t_berlin.id_terminal),
+        Vol(numero_vol=3017, date_debut=date(2026, 6, 22), heure_debut=time(10, 0), date_arrivee=date(2026, 6, 22), heure_arrivee=time(11, 45), id_compagnie=lufthansa.id_compagnie, numero_aeroport_dep=frankfurt.numero_aeroport, id_terminal_dep=t_frank.id_terminal, numero_aeroport_arr=orly.numero_aeroport, id_terminal_arr=t_orly.id_terminal),
+        Vol(numero_vol=3018, date_debut=date(2026, 6, 24), heure_debut=time(14, 15), date_arrivee=date(2026, 6, 24), heure_arrivee=time(15, 30), id_compagnie=ryanair.id_compagnie, numero_aeroport_dep=berlin.numero_aeroport, id_terminal_dep=t_berlin.id_terminal, numero_aeroport_arr=nice.numero_aeroport, id_terminal_arr=t_nice.id_terminal),
+        Vol(numero_vol=3019, date_debut=date(2026, 6, 28), heure_debut=time(8, 0), date_arrivee=date(2026, 6, 28), heure_arrivee=time(9, 30), id_compagnie=air_france.id_compagnie, numero_aeroport_dep=orly.numero_aeroport, id_terminal_dep=t_orly.id_terminal, numero_aeroport_arr=lyon.numero_aeroport, id_terminal_arr=t_lyon.id_terminal),
+        Vol(numero_vol=3020, date_debut=date(2026, 6, 30), heure_debut=time(19, 0), date_arrivee=date(2026, 6, 30), heure_arrivee=time(20, 45), id_compagnie=lufthansa.id_compagnie, numero_aeroport_dep=lyon.numero_aeroport, id_terminal_dep=t_lyon.id_terminal, numero_aeroport_arr=cdg.numero_aeroport, id_terminal_arr=t2_cdg.id_terminal),
+    ]
+    
+    db.session.add_all(vols_mai_juin)
+    db.session.commit()
+
+    # --- 8. Ajouter 5 vols avant le 29/03/2026 (Paris -> Lyon) ---
+    vols_avant_29_mars = [
+        Vol(numero_vol=4001, date_debut=date(2026, 3, 20), heure_debut=time(8, 0), date_arrivee=date(2026, 3, 20), heure_arrivee=time(9, 30), id_compagnie=air_france.id_compagnie, numero_aeroport_dep=cdg.numero_aeroport, id_terminal_dep=t1_cdg.id_terminal, numero_aeroport_arr=lyon.numero_aeroport, id_terminal_arr=t_lyon.id_terminal),
+        Vol(numero_vol=4002, date_debut=date(2026, 3, 21), heure_debut=time(10, 15), date_arrivee=date(2026, 3, 21), heure_arrivee=time(11, 45), id_compagnie=lufthansa.id_compagnie, numero_aeroport_dep=orly.numero_aeroport, id_terminal_dep=t_orly.id_terminal, numero_aeroport_arr=lyon.numero_aeroport, id_terminal_arr=t_lyon.id_terminal),
+        Vol(numero_vol=4003, date_debut=date(2026, 3, 22), heure_debut=time(14, 30), date_arrivee=date(2026, 3, 22), heure_arrivee=time(16, 0), id_compagnie=ryanair.id_compagnie, numero_aeroport_dep=cdg.numero_aeroport, id_terminal_dep=t2_cdg.id_terminal, numero_aeroport_arr=lyon.numero_aeroport, id_terminal_arr=t_lyon.id_terminal),
+        Vol(numero_vol=4004, date_debut=date(2026, 3, 23), heure_debut=time(17, 0), date_arrivee=date(2026, 3, 23), heure_arrivee=time(18, 30), id_compagnie=air_france.id_compagnie, numero_aeroport_dep=orly.numero_aeroport, id_terminal_dep=t_orly.id_terminal, numero_aeroport_arr=lyon.numero_aeroport, id_terminal_arr=t_lyon.id_terminal),
+        Vol(numero_vol=4005, date_debut=date(2026, 3, 24), heure_debut=time(19, 45), date_arrivee=date(2026, 3, 24), heure_arrivee=time(21, 15), id_compagnie=air_france.id_compagnie, numero_aeroport_dep=cdg.numero_aeroport, id_terminal_dep=t1_cdg.id_terminal, numero_aeroport_arr=lyon.numero_aeroport, id_terminal_arr=t_lyon.id_terminal),
+    ]
+    
+    db.session.add_all(vols_avant_29_mars)
     db.session.commit()
 
     print("✓ Base de données remplie avec succès !")
