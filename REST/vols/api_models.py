@@ -24,6 +24,12 @@ vol_input_model = api.model('VolInput', {
     'numero_aeroport_arr': fields.Integer(required=True),
     'id_terminal_arr': fields.Integer(required=False)
 })
+
+vol_search_model = api.model('VolSearch', {
+    'aller': fields.List(fields.Nested(vol_model)),
+    'retour': fields.List(fields.Nested(vol_model))
+})
+
 compagnie_model = api.model('Compagnie', {
     'id_compagnie': fields.Integer,
     'nom_compagnie': fields.String,
@@ -50,11 +56,15 @@ aeroport_model = api.model('Aeroport', {
     'numero_aeroport': fields.Integer,
     'nom_aeroport': fields.String,
     'ville': fields.String,
-    'pays': fields.String
+    'pays': fields.String,
+    'latitude': fields.Float,
+    'longitude': fields.Float
 })
 
 aeroport_input_model = api.model('AeroportInput', {
     'nom_aeroport': fields.String(required=True),
     'ville': fields.String(required=True),
-    'pays': fields.String(required=True)
+    'pays': fields.String(required=True),
+    'latitude': fields.Float(required=True),
+    'longitude': fields.Float(required=True)
 })

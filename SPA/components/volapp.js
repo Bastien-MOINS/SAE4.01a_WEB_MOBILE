@@ -63,7 +63,8 @@ export class VolSubViewApp {
 
     async loadVols() {
         try {
-            this.state.vols = await VolAPI.getVols();
+            const list = await VolAPI.getVols();
+            this.state.vols = Array.isArray(list) ? list : [];
         } catch (e) {
             console.error(e);
             this.state.vols = []; // Fallback en cas d'erreur
@@ -74,7 +75,14 @@ export class VolSubViewApp {
     async renderGetVol() {
         this.state.idVol = null;
         let rows = '';
-        
+
+        // Pré-charger les données pour éviter de faire des requêtes pour chaque vol
+        const [compagnies, aeroports, terminaux] = await Promise.all([
+            CompagnieAPI.getCompagnies().catch(() => []),
+            AeroportAPI.getAeroports().catch(() => []),
+            TerminalAPI.getTerminaux().catch(() => [])
+        ]);
+
         for (const vol of this.state.vols) {
             const idV = vol.numero_vol;
             let nomCompagnie = "Non définie";
@@ -82,29 +90,23 @@ export class VolSubViewApp {
             let nomAeroportArr = "Non définie";
             let nomTerminalDep = "Non définie";
             let nomTerminalArr = "Non définie";
+            
             try {
-                const responseCompagnie = await CompagnieAPI.getCompagnieById(vol.id_compagnie);
-                nomCompagnie = responseCompagnie.nom_compagnie;
-                const responseAeroportDep = await AeroportAPI.getAeroportById(vol.numero_aeroport_dep);
-                nomAeroportDep = responseAeroportDep.nom_aeroport;
-                const responseAeroportArr = await AeroportAPI.getAeroportById(vol.numero_aeroport_arr);
-                nomAeroportArr = responseAeroportArr.nom_aeroport;
-                const responseTerminalDep = await TerminalAPI.getTerminalById(vol.id_terminal_dep);
-                nomTerminalDep = responseTerminalDep.nom_terminal;
-                const responseTerminalArr = await TerminalAPI.getTerminalById(vol.id_terminal_arr);
-                nomTerminalArr = responseTerminalArr.nom_terminal;
-
+                nomCompagnie = compagnies.find(c => c.id_compagnie === vol.id_compagnie)?.nom_compagnie || "Non définie";
+                nomAeroportDep = aeroports.find(a => a.numero_aeroport === vol.numero_aeroport_dep)?.nom_aeroport || "Non définie";
+                nomAeroportArr = aeroports.find(a => a.numero_aeroport === vol.numero_aeroport_arr)?.nom_aeroport || "Non définie";
+                nomTerminalDep = terminaux.find(t => t.id_terminal === vol.id_terminal_dep)?.nom_terminal || "Non définie";
+                nomTerminalArr = terminaux.find(t => t.id_terminal === vol.id_terminal_arr)?.nom_terminal || "Non définie";
             } catch(e) {
-                console.error("Compagnie non existante", e);
+                console.error("Erreur lors de la récupération des données", e);
             }
-            console.log(nomCompagnie);
             rows += `
                 <tr class="border-b border-gray-200 hover:bg-gray-50 transition-colors">
                     <td class="px-6 py-4 text-center border-r border-gray-200">${idV}</td>
                     <td class="px-6 py-4 border-r border-gray-200 font-bold">
                         <div class="flex flex-col text-center">
                             <div class="py-2">${vol.date_debut} - ${vol.date_arrivee}</div>
-                            <div class="py-2">${vol.heure_debut} - ${vol.heure_arrivee}</div>
+                            <div class="py-2">${vol.heure_debut.substring(0,5)} - ${vol.heure_arrivee.substring(0,5)}</div>
                         </div>
                     </td>
                     <td class="px-6 py-4 border-r border-gray-200 font-bold text-center">${nomCompagnie}</td>

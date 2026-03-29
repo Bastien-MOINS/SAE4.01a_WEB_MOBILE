@@ -29,7 +29,7 @@ export class AeroportAPI {
         }
     }
 
-    static async createAeroport(nomAeroport, ville, pays) {
+    static async createAeroport(nomAeroport, ville, pays, longitude, latitude) {
         try {
             const response = await fetch(this.BASE_URL, {
                 method: 'POST',
@@ -39,7 +39,9 @@ export class AeroportAPI {
                 body: JSON.stringify(
                     { nom_aeroport: nomAeroport,
                       ville: ville,
-                      pays: pays
+                      pays: pays,
+                      longitude: longitude,
+                      latitude: latitude
                  })
             });
 

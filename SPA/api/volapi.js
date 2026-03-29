@@ -9,7 +9,8 @@ export class VolAPI {
             if (!response.ok) throw new Error("Erreur réseau");
             
             const json = await response.json();
-            return json;
+            
+            return json.aller || (Array.isArray(json) ? json : []);
         } catch (error) {
             console.error("Erreur lors de la récupération des vols:", error);
             return [];

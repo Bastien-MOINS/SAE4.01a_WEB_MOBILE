@@ -157,7 +157,7 @@ export class AeroportSubViewApp {
     async renderPutPostAeroport(){
         let http = "Ajouter un aéroport";
         let iconClass = "fa-circle-plus text-green-600";
-        const aeroport = {nom: '', ville:'', pays:''};
+        const aeroport = {nom: '', ville:'', pays:'', longitude:'', latitude:''};
         const numAeroport = this.state.numAeroport;
 
         if (numAeroport){
@@ -166,6 +166,8 @@ export class AeroportSubViewApp {
                 aeroport.nom = response.nom_aeroport;
                 aeroport.ville = response.ville;
                 aeroport.pays = response.pays;
+                aeroport.longitude = response.longitude;
+                aeroport.latitude = response.latitude;
                 http = "Modifier un aéroport";
                 iconClass = "fa-edit text-lime-600";
             } catch(error) {
@@ -203,6 +205,18 @@ export class AeroportSubViewApp {
                                 <input type="text" id="addPaysA" value="${aeroport.pays}" 
                                     class="w-full px-4 py-3 text-xl border border-gray-300 rounded-lg focus:outline-none focus:ring-4 ${numAeroport ? 'focus:ring-lime-200' : 'focus:ring-green-200'} transition-all"
                                     placeholder="Ex: France" />
+                            </div>
+                            <div class="mb-6">
+                                <label class="block text-2xl font-bold mb-3 ${numAeroport ? 'text-lime-900' : 'text-green-900'}">Longitude</label>
+                                <input type="text" id="addLongA" value="${aeroport.longitude}" 
+                                    class="w-full px-4 py-3 text-xl border border-gray-300 rounded-lg focus:outline-none focus:ring-4 ${numAeroport ? 'focus:ring-lime-200' : 'focus:ring-green-200'} transition-all"
+                                    placeholder="Ex: 2.5479" />
+                            </div>
+                            <div class="mb-6">
+                                <label class="block text-2xl font-bold mb-3 ${numAeroport ? 'text-lime-900' : 'text-green-900'}">Latitude</label>
+                                <input type="text" id="addLatA" value="${aeroport.latitude}" 
+                                    class="w-full px-4 py-3 text-xl border border-gray-300 rounded-lg focus:outline-none focus:ring-4 ${numAeroport ? 'focus:ring-lime-200' : 'focus:ring-green-200'} transition-all"
+                                    placeholder="Ex: 49.0097" />
                             </div>
                             
                             <div class="flex justify-end gap-4 mt-8 pt-6 border-t ${numAeroport ? 'border-lime-200' : 'border-green-200'}">
@@ -263,14 +277,20 @@ export class AeroportSubViewApp {
                 const inputNom = document.getElementById('addNomA');
                 const inputVille = document.getElementById('addVilleA');
                 const inputPays = document.getElementById('addPaysA');
+                const inputLong = document.getElementById('addLongA');
+                const inputLat = document.getElementById('addLatA');
                 if (!inputNom) return; 
 
                 const nom = inputNom.value.trim();
                 const ville = inputVille.value.trim();
                 const pays = inputPays.value.trim();
+                const longitude = parseFloat(inputLong.value.trim());
+                const latitude = parseFloat(inputLat.value.trim());
                 if (!nom) return alert("Le nom est requis.");
-                if (!ville) return alert("La ville est requis.");
+                if (!ville) return alert("La ville est requise.");
                 if (!pays) return alert("Le pays est requis.");
+                if (isNaN(longitude)) return alert("La longitude doit être un nombre valide.");
+                if (isNaN(latitude)) return alert("La latitude doit être un nombre valide.");
 
                 try {
                     if (this.state.numAeroport) {
@@ -279,7 +299,7 @@ export class AeroportSubViewApp {
                         this.showToast("Aéroport modifiée avec succès.");
                     } else {
                         // Create
-                        await AeroportAPI.createAeroport(nom, ville, pays);
+                        await AeroportAPI.createAeroport(nom, ville, pays, longitude, latitude);
                         this.showToast("Aéroport créée avec succès.");
                     }
 

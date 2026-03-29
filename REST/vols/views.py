@@ -1,9 +1,10 @@
 from flask import jsonify, abort, make_response, request, url_for
+from sqlalchemy import text
 from .models import *
 from flask_restx import Resource, Namespace, fields
 from datetime import datetime
 from .app import app, db, api
-from .api_models import aeroport_model, aeroport_input_model, terminal_model, terminal_input_model, vol_model, vol_input_model, compagnie_input_model, compagnie_model
+from .api_models import aeroport_model, aeroport_input_model, terminal_model, terminal_input_model, vol_model, vol_input_model, compagnie_input_model, compagnie_model, vol_search_model
 
 ns_compagnie = api.namespace('compagnies')
 
@@ -85,8 +86,12 @@ class AeroportCollection(Resource):
             abort(400, "La ville doit être une chaîne de caractères.")
         if not data.get('pays') or not isinstance(data.get('pays'), str):
             abort(400, "Le pays doit être une chaîne de caractères.")
+        if 'latitude' not in data or not isinstance(data.get('latitude'), (int, float)):
+            abort(400, "La latitude doit être un nombre.")
+        if 'longitude' not in data or not isinstance(data.get('longitude'), (int, float)):
+            abort(400, "La longitude doit être un nombre.")
 
-        return create_aeroport(nom_aeroport=data.get('nom_aeroport'), ville=data.get('ville'), pays=data.get('pays')), 201
+        return create_aeroport(nom_aeroport=data.get('nom_aeroport'), ville=data.get('ville'), pays=data.get('pays'), latitude=data.get('latitude'), longitude=data.get('longitude')), 201
 
 @ns_aeroport.route('/<int:id>')
 @ns_aeroport.response(404, 'Aéroport non trouvé')
@@ -120,7 +125,11 @@ class AeroportItem(Resource):
             abort(400, "La ville doit être une chaîne de caractères.")
         if 'pays' in data and not isinstance(data.get('pays'), str):
             abort(400, "Le pays doit être une chaîne de caractères.")
-        aeroport = update_aeroport(id=id, nom_aeroport=data.get('nom_aeroport'), ville=data.get('ville'), pays=data.get('pays'))
+        if 'latitude' in data and not isinstance(data.get('latitude'), (int, float)):
+            abort(400, "La latitude doit être un nombre.")
+        if 'longitude' in data and not isinstance(data.get('longitude'), (int, float)):
+            abort(400, "La longitude doit être un nombre.")
+        aeroport = update_aeroport(id=id, nom_aeroport=data.get('nom_aeroport'), ville=data.get('ville'), pays=data.get('pays'), latitude=data.get('latitude'), longitude=data.get('longitude'))
         if not aeroport:
             abort(404, f"Impossible de modifier : l'aéroport avec l'identifiant {id} n'existe pas.")
         return aeroport
@@ -215,13 +224,109 @@ class TerminalItem(Resource):
     
 ns_vol = api.namespace('vol')
 
+parser_vols = api.parser()
+parser_vols.add_argument('villeDepart', type=str, location='args', help='Nom de la ville de départ')
+parser_vols.add_argument('villeArrivee', type=str, location='args', help='Nom de la ville d\'arrivée')
+parser_vols.add_argument('DateDepart', type=str, location='args', help='Date de départ pour l\'aller')
+parser_vols.add_argument('DateRetour', type=str, location='args', help='Date de départ pour le retour')
+
 @ns_vol.route('/')
 class VolCollection(Resource):
-    @ns_vol.doc('list_vols')
-    @ns_vol.marshal_list_with(vol_model)
+    @ns_vol.doc('list_vols', parser=parser_vols)
     def get(self):
-        '''Liste tous les vols'''
-        return get_all_vols()
+        '''Recherche de vols Aller/Retour ou liste tous les vols'''
+        ville_depart = request.args.get('villeDepart', type=str)
+        ville_arrivee = request.args.get('villeArrivee', type=str)
+        date_depart = request.args.get('DateDepart', type=str)
+        date_retour = request.args.get('DateRetour', type=str)
+        corr = request.args.get('correspondence', 'direct', type=str) # 'direct', 'one', or 'two'
+
+        if corr == 'direct':
+            # On ajoute une condition pour gérer les champs vides
+            query = """
+                SELECT V.*        FROM VOL V
+                JOIN AEROPORT A1 ON V.numero_aeroport_dep = A1.numero_aeroport
+                JOIN AEROPORT A2 ON V.numero_aeroport_arr = A2.numero_aeroport
+                WHERE (:dep = '' OR A1.ville = :dep) 
+                  AND (:arr = '' OR A2.ville = :arr)
+            """
+            resultats = db.session.execute(text(query), {"dep": ville_depart or '', "arr": ville_arrivee or ''}).fetchall()
+            vols = [dict(row._mapping) for row in resultats]
+            return {"aller": api.marshal(vols, vol_model)}
+
+        elif corr == 'one':
+            print("C'est un")
+            query = """
+                SELECT V1.numero_vol as v1_num, V2.numero_vol as v2_num
+                FROM VOL V1
+                JOIN VOL V2 ON V1.numero_aeroport_arr = V2.numero_aeroport_dep
+                JOIN AEROPORT A1 ON V1.numero_aeroport_dep = A1.numero_aeroport
+                JOIN AEROPORT A2 ON V2.numero_aeroport_arr = A2.numero_aeroport
+                WHERE (:dep = '' OR A1.ville = :dep) 
+                  AND (:arr = '' OR A2.ville = :arr)
+                  AND (V2.date_debut > V1.date_arrivee OR (V2.date_debut = V1.date_arrivee AND V2.heure_debut > V1.heure_arrivee))
+                  AND V1.numero_aeroport_dep != V2.numero_aeroport_arr
+            """
+            resultats = db.session.execute(text(query), {"dep": ville_depart or '', "arr": ville_arrivee or ''}).fetchall()
+            vols_res = []
+            for row in resultats:
+                # On récupère les objets complets
+                v1 = Vol.query.get(row.v1_num)
+                v2 = Vol.query.get(row.v2_num)
+                # On crée un "trip" (liste de vols)
+                trip = [api.marshal(v1, vol_model), api.marshal(v2, vol_model)]
+                vols_res.append(trip)
+            return {"aller": vols_res}
+
+        elif corr == 'two':
+            print("C'est 2")
+            query = """
+                SELECT V1.numero_vol as v1_num, V2.numero_vol as v2_num, V3.numero_vol as v3_num
+                FROM VOL V1
+                JOIN AEROPORT A1 ON V1.numero_aeroport_dep = A1.numero_aeroport
+                JOIN VOL V2 ON V1.numero_aeroport_arr = V2.numero_aeroport_dep
+                JOIN VOL V3 ON V2.numero_aeroport_arr = V3.numero_aeroport_dep
+                JOIN AEROPORT A2 ON V3.numero_aeroport_arr = A2.numero_aeroport
+                WHERE (:dep = '' OR A1.ville LIKE :dep_pattern) 
+                AND (:arr = '' OR A2.ville LIKE :arr_pattern)
+
+                -- Empêcher de repasser par le même aéroport
+                AND V1.numero_aeroport_dep != V2.numero_aeroport_arr
+                AND V1.numero_aeroport_dep != V3.numero_aeroport_arr
+                AND V1.numero_aeroport_arr != V3.numero_aeroport_arr
+
+                -- Correspondance 1 (V1 -> V2) : après l'arrivée et dans les 24h
+                AND (V2.date_debut > V1.date_arrivee OR (V2.date_debut = V1.date_arrivee AND V2.heure_debut > V1.heure_arrivee))
+                AND (V2.date_debut < date(V1.date_arrivee, '+1 day') OR (V2.date_debut = date(V1.date_arrivee, '+1 day') AND V2.heure_debut <= V1.heure_arrivee))
+
+                -- Correspondance 2 (V2 -> V3) : après l'arrivée et dans les 24h
+                AND (V3.date_debut > V2.date_arrivee OR (V3.date_debut = V2.date_arrivee AND V3.heure_debut > V2.heure_arrivee))
+                AND (V3.date_debut < date(V2.date_arrivee, '+1 day') OR (V3.date_debut = date(V2.date_arrivee, '+1 day') AND V3.heure_debut <= V2.heure_arrivee))
+            """
+            
+            params = {
+                "dep": ville_depart or '',
+                "dep_pattern": f"%{ville_depart}%" if ville_depart else '',
+                "arr": ville_arrivee or '',
+                "arr_pattern": f"%{ville_arrivee}%" if ville_arrivee else ''
+            }
+
+            resultats = db.session.execute(text(query), params).fetchall()
+
+            vols_res = []
+            for row in resultats:
+                v1 = Vol.query.get(row.v1_num)
+                v2 = Vol.query.get(row.v2_num)
+                v3 = Vol.query.get(row.v3_num)
+                # On marshal chaque vol pour avoir l'objet JSON complet
+                trip = [api.marshal(v1, vol_model), api.marshal(v2, vol_model), api.marshal(v3, vol_model)]
+                vols_res.append(trip)
+
+            return {"aller": vols_res}
+
+        # Fallback par défaut (toujours avec la clé "aller")
+        vols = get_vols_filtered(ville_depart, ville_arrivee, date_depart, date_retour)
+        return {"aller": api.marshal(vols, vol_model)}
 
     @ns_vol.doc('create_vol')
     @ns_vol.expect(vol_input_model, validate=True)
