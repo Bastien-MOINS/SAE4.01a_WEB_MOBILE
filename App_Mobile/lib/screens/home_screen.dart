@@ -8,12 +8,22 @@ import '../models/api.dart';
 /// Implémente la vue d'accueil de l'application
 /// Affiche la liste des vols réservés par l'utilisateur
 class HomeScreen extends StatelessWidget{
-  FlightRepository flightRepository = FlightRepository();
+  final FlightRepository flightRepository;
+  final AuthRepository authRepository;
+  final Api api;
+
+  HomeScreen({
+    super.key,
+    FlightRepository? flightRepository,
+    AuthRepository? authRepository,
+    Api? api,
+  })  : flightRepository = flightRepository ?? FlightRepository(),
+        authRepository = authRepository ?? AuthRepository(),
+        api = api ?? Api();
 
   /// Récupère l'ensemble des données nécessaires à l'affichage de la page
   /// Retourne un [Future<Map<String, dynamic>>] contenant les vols, aéroports et compagnies
   Future<Map<String, dynamic>> _loadData() async {
-    Api api = Api();
     final flights = await flightRepository.getSavedFlights();
     final airports = await api.getAirportsMap();
     final compagnies = await api.getCompagniesMap();
@@ -41,7 +51,7 @@ class HomeScreen extends StatelessWidget{
               padding: const EdgeInsets.only(right: 5.0),
               child: GestureDetector(
                 onTap: () async {
-                  var isConnected = await AuthRepository().isConnected();
+                var isConnected = await authRepository.isConnected();
                   Navigator.push(
                     context,
                     MaterialPageRoute (
@@ -59,7 +69,7 @@ class HomeScreen extends StatelessWidget{
           ]
       ),
       body: FutureBuilder<bool>(
-        future: AuthRepository().isConnected(),
+        future: authRepository.isConnected(),
         builder: (context, snapshot) {
           bool isConnected = snapshot.data ?? false;
           if (snapshot.connectionState != ConnectionState.done) {
