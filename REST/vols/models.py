@@ -56,18 +56,24 @@ class Aeroport(db.Model):
     nom_aeroport = db.Column(db.String(38))
     ville = db.Column(db.String(38))
     pays = db.Column(db.String(38))
+    latitude = db.Column(db.Float)
+    longitude = db.Column(db.Float)
 
-    def __init__(self, nom_aeroport, ville, pays):
+    def __init__(self, nom_aeroport, ville, pays, latitude, longitude):
         self.nom_aeroport = nom_aeroport
         self.ville = ville
         self.pays = pays
+        self.latitude = latitude
+        self.longitude = longitude
 
     def to_json(self):
         return {
             'numero_aeroport': self.numero_aeroport,
             'nom_aeroport': self.nom_aeroport,
             'ville': self.ville,
-            'pays': self.pays
+            'pays': self.pays,
+            'latitude': self.latitude,
+            'longitude': self.longitude
         }
 
 def get_all_aeroports():
@@ -76,13 +82,13 @@ def get_all_aeroports():
 def get_aeroport_by_id(id):
     return Aeroport.query.get(id)
 
-def create_aeroport(nom_aeroport, ville, pays):
-    new_aeroport = Aeroport(nom_aeroport, ville, pays)
+def create_aeroport(nom_aeroport, ville, pays, latitude, longitude):
+    new_aeroport = Aeroport(nom_aeroport, ville, pays, latitude, longitude)
     db.session.add(new_aeroport)
     db.session.commit()
     return new_aeroport
 
-def update_aeroport(id, nom_aeroport=None, ville=None, pays=None):
+def update_aeroport(id, nom_aeroport=None, ville=None, pays=None, latitude=None, longitude=None):
     aeroport = Aeroport.query.get(id)
     if not aeroport:
         return None
@@ -92,6 +98,10 @@ def update_aeroport(id, nom_aeroport=None, ville=None, pays=None):
         aeroport.ville = ville
     if pays is not None:
         aeroport.pays = pays
+    if latitude is not None:
+        aeroport.latitude = latitude
+    if longitude is not None:
+        aeroport.longitude = longitude
     db.session.commit()
     return aeroport
 
@@ -238,7 +248,43 @@ def _parse_time(value):
 
 
 def get_all_vols():
-    return Vol.query.all()
+    return Vol.query.filter(Vol.date_debut >= date.today()).all()
+
+def get_vols_filtered(ville_depart=None, ville_arrivee=None, date_depart=None, date_retour=None):
+    query_aller = Vol.query
+    
+    if ville_depart:
+        villes_dep = db.session.query(Aeroport.numero_aeroport).filter(Aeroport.ville.ilike(f'%{ville_depart}%'))
+        query_aller = query_aller.filter(Vol.numero_aeroport_dep.in_(villes_dep))
+                     
+    if ville_arrivee:
+        villes_arr = db.session.query(Aeroport.numero_aeroport).filter(Aeroport.ville.ilike(f'%{ville_arrivee}%'))
+        query_aller = query_aller.filter(Vol.numero_aeroport_arr.in_(villes_arr))
+    
+    if date_depart:
+        query_aller = query_aller.filter_by(date_debut=_parse_date(date_depart))
+
+    vols_aller = query_aller.all()
+
+    if not date_retour:
+        return vols_aller
+
+    query_retour = Vol.query
+    
+    if ville_arrivee: 
+        villes_dep_retour = db.session.query(Aeroport.numero_aeroport).filter(Aeroport.ville.ilike(f'%{ville_arrivee}%'))
+        query_retour = query_retour.filter(Vol.numero_aeroport_dep.in_(villes_dep_retour))
+        
+    if ville_depart:
+        villes_arr_retour = db.session.query(Aeroport.numero_aeroport).filter(Aeroport.ville.ilike(f'%{ville_depart}%'))
+        query_retour = query_retour.filter(Vol.numero_aeroport_arr.in_(villes_arr_retour))
+        
+    query_retour = query_retour.filter_by(date_debut=_parse_date(date_retour))
+
+    return {
+        'aller': vols_aller,
+        'retour': query_retour.all()
+    }
 
 def get_vol_by_id(numero_vol):
     return Vol.query.get(numero_vol)
