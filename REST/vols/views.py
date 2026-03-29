@@ -240,6 +240,7 @@ class VolCollection(Resource):
         date_depart = request.args.get('DateDepart', type=str)
         date_retour = request.args.get('DateRetour', type=str)
         corr = request.args.get('correspondence', 'direct', type=str) # 'direct', 'one', or 'two'
+        print(corr)
 
         if corr == 'direct':
             # On ajoute une condition pour gérer les champs vides
@@ -255,7 +256,6 @@ class VolCollection(Resource):
             return {"aller": api.marshal(vols, vol_model)}
 
         elif corr == 'one':
-            print("C'est un")
             query = """
                 SELECT V1.numero_vol as v1_num, V2.numero_vol as v2_num
                 FROM VOL V1
@@ -279,7 +279,6 @@ class VolCollection(Resource):
             return {"aller": vols_res}
 
         elif corr == 'two':
-            print("C'est 2")
             query = """
                 SELECT V1.numero_vol as v1_num, V2.numero_vol as v2_num, V3.numero_vol as v3_num
                 FROM VOL V1
