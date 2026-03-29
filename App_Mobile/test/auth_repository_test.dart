@@ -10,7 +10,7 @@ void main() {
       SharedPreferences.setMockInitialValues({});
     });
 
-    test("Apres inscription, si c'est le même pseudo est mdp ca marche", () async {
+    test("Apres inscription, si c'est le même pseudo est mdp ça marche", () async {
       final authRepository = AuthRepository();
       const pseudo = "Nicolas";
       const mdp = "mdp123";
