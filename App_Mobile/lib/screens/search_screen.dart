@@ -236,6 +236,9 @@ class _SearchScreenState extends State<SearchScreen> {
                     Correspondence.one: Text('1 escale'),
                     Correspondence.two: Text('2 escales'),
                   },
+                ),
+              ),
+              SizedBox(height: 12),
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
@@ -253,7 +256,7 @@ class _SearchScreenState extends State<SearchScreen> {
                   ),
                   child: Text("Rechercher un vol"),
                 ),
-              )
+              ),
             ],
           ),
         ),
