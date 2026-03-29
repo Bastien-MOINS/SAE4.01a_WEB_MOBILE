@@ -85,7 +85,7 @@ class MainApp {
             <div class="flex flex-col h-screen bg-gray-50 font-jersey text-lg">
                 <header class="flex h-16 bg-gray-100 border-b border-black">
                     <div class="flex items-center justify-center w-32 border-r border-black bg-gray-100 text-3xl">
-                        <i class="fa-solid fa-plane"></i>
+                        <img src="img/FTLogo2.png" width="60" height=""60"/>
                     </div>
                     <nav class="flex flex-1">
                         <a href="#/compagnies" id="btn-compagnies" class="flex-1 flex items-center justify-center text-2xl font-bold uppercase border-r border-black transition-colors ${getNavClass('compagnie')}">Compagnie</a>
