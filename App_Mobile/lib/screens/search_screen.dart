@@ -2,6 +2,10 @@ import 'package:app_mobile/models/flight.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../models/api.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/cupertino.dart';
+import '../models/correspondence.dart';
+
 import '../repositories/auth_repository.dart';
 /// Implémente la vue de recherche de vol avec filtres
 class SearchScreen extends StatefulWidget {
@@ -16,11 +20,12 @@ class _SearchScreenState extends State<SearchScreen> {
   final TextEditingController _departureController = TextEditingController();
   final TextEditingController _arrivalController = TextEditingController();
 
-  List<Flight> _flights = [];
-  List<Flight> _retourFlights = [];
+  List<List<Flight>> _flights = [];
+  List<List<Flight>> _retourFlights = [];
   Map<int, dynamic> _airports = {};
   Map<int, dynamic> _compagnies = {};
   bool _isLoading = false;
+  Correspondence _selectedSegment = Correspondence.direct;
 
   DateTime? _dateDepart;
   DateTime? _dateRetour;
@@ -34,34 +39,29 @@ class _SearchScreenState extends State<SearchScreen> {
   /// Effectue la recherche de vols via l'API, en utilisant les filtres choisis
   /// Met à jour l'état de l'application et l'affichage avec les résultats
   void _searchFlights() async {
-    setState(() {
-      _isLoading = true;
-    });
+    setState(() => _isLoading = true);
 
     try {
       final results = await api.getFlights(
         villeDepart: _departureController.text,
         villeArrivee: _arrivalController.text,
         dateDepart: _dateDepart?.toIso8601String().substring(0, 10),
-        dateRetour: _dateRetour?.toIso8601String().substring(0, 10),
+        correspondence: _selectedSegment,
       );
+
+      // Récupération des maps pour les noms d'aéroports/compagnies
       final airports = await api.getAirportsMap();
       final compagnies = await api.getCompagniesMap();
-      
+
       setState(() {
         _flights = results['aller'] ?? [];
-        _retourFlights = results['retour'] ?? [];
         _airports = airports;
         _compagnies = compagnies;
         _isLoading = false;
       });
     } catch (e) {
-      setState(() {
-        _isLoading = false;
-      });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erreur lors de la récupération des vols')),
-      );
+      print("Erreur: $e");
+      setState(() => _isLoading = false);
     }
   }
 
@@ -98,9 +98,71 @@ class _SearchScreenState extends State<SearchScreen> {
             SliverList.builder(
               itemCount: _flights.length,
               itemBuilder: (BuildContext context, int index) {
-                return _flights[index].toWidget(context, _airports, _compagnies, returnFlights: _retourFlights.isNotEmpty ? _retourFlights : null);
-              }
-            ),
+                final trip = _flights[index];
+                final int correspondences = trip.length - 1;
+
+                return Card(
+                  margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  elevation: 2,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Header showing trip type
+                        Padding(
+                          padding: const EdgeInsets.only(left: 12, top: 8),
+                          child: Text(
+                            correspondences == 0
+                                ? "Vol Direct"
+                                : "$correspondences Correspondance${correspondences > 1 ? 's' : ''}",
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: correspondences == 0 ? Colors.green : Colors.orange,
+                            ),
+                          ),
+                        ),
+                        const Divider(),
+                        // Map each flight in the trip to its widget
+                        ListView.separated(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: trip.length,
+                          separatorBuilder: (context, i) {
+                            // Get the city where the stopover happens
+                            final airportId = trip[i].numeroAeroportArrivee;
+                            final cityName = _airports[airportId]?['ville'] ?? 'Escale';
+
+                            return Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 8),
+                              child: Row(
+                                children: [
+                                  const Expanded(child: Divider()),
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                                    child: Chip(
+                                      label: Text("Escale à $cityName"),
+                                      backgroundColor: Colors.blue.shade50,
+                                      labelStyle: const TextStyle(fontSize: 12),
+                                    ),
+                                  ),
+                                  const Expanded(child: Divider()),
+                                ],
+                              ),
+                            );
+                          },
+                          itemBuilder: (context, i) {
+                            // Reuse your existing toWidget but with smaller margins if needed
+                            return trip[i].toWidget(context, _airports, _compagnies);
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            )
         ],
       ),
     );
@@ -156,6 +218,27 @@ class _SearchScreenState extends State<SearchScreen> {
                 ],
               ),
               SizedBox(height: 12),
+              Center(
+                child: CupertinoSlidingSegmentedControl<Correspondence>(
+                  groupValue: _selectedSegment,
+                  onValueChanged: (Correspondence? value) {
+                    try{
+                      setState(() {
+                        _selectedSegment = value!;
+                      });
+                      _searchFlights();
+                    }catch(e){
+                      print(e);
+                    }
+                  },
+                  children: const <Correspondence, Widget>{
+                    Correspondence.direct: Text('Direct'),
+                    Correspondence.one: Text('1 escale'),
+                    Correspondence.two: Text('2 escales'),
+                  },
+                ),
+              ),
+              SizedBox(height: 12),
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
@@ -173,7 +256,7 @@ class _SearchScreenState extends State<SearchScreen> {
                   ),
                   child: Text("Rechercher un vol"),
                 ),
-              )
+              ),
             ],
           ),
         ),

@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'correspondence.dart';
 import 'package:app_mobile/models/airport.dart';
 import 'package:app_mobile/models/flight.dart';
 import 'package:flutter/foundation.dart';
@@ -16,53 +17,44 @@ class Api {
       url = "10.0.2.2";
     }
   }
-
-  /// Permet de récupérer des vols en fonction de différents paramètres
-  /// Retourne un [Future<Map<String, List<Flight>>>] contenant les vols allers et potentiellement retours
-  Future<Map<String, List<Flight>>> getFlights({String? villeDepart, String? villeArrivee, String? dateDepart, String? dateRetour}) async {
+  Future<Map<String, List<List<Flight>>>> getFlights({
+    String? villeDepart,
+    String? villeArrivee,
+    String? dateDepart,
+    String? dateRetour,
+    Correspondence? correspondence,
+  }) async {
     _checkUrl();
-    
+
     Map<String, String> query = {};
-    if (villeDepart != null && villeDepart.isNotEmpty) {
-      query['villeDepart'] = villeDepart;
-    }
-    if (villeArrivee != null && villeArrivee.isNotEmpty) {
-      query['villeArrivee'] = villeArrivee;
-    }
-    if (dateDepart != null && dateDepart.isNotEmpty) {
-      query['DateDepart'] = dateDepart;
-    }
-    if (dateRetour != null && dateRetour.isNotEmpty) {
-      query['DateRetour'] = dateRetour;
-    }
+    if (villeDepart?.isNotEmpty ?? false) query['villeDepart'] = villeDepart!;
+    if (villeArrivee?.isNotEmpty ?? false) query['villeArrivee'] = villeArrivee!;
+    if (dateDepart?.isNotEmpty ?? false) query['DateDepart'] = dateDepart!;
+    if (dateRetour?.isNotEmpty ?? false) query['DateRetour'] = dateRetour!;
+    if (correspondence != null) query['correspondence'] = correspondence.name;
 
     Uri uri = Uri.http("$url:5000", "/vol/", query.isNotEmpty ? query : null);
-    
+
     final response = await http.get(uri);
-    if (response.statusCode == 200){
+    if (response.statusCode == 200) {
       dynamic json = jsonDecode(response.body);
-      final aller = <Flight>[];
-      final retour = <Flight>[];
-      
-      if (json is Map<String, dynamic>) {
-        if (json['aller'] != null) {
-          for (var flight in json['aller']) {
-            aller.add(Flight.fromJson(flight));
-          }
+      final aller = <List<Flight>>[];
+
+      // Fonction helper pour transformer le JSON en List de List
+      List<Flight> parseTrip(dynamic item) {
+        if (item is List) {
+          return item.map((f) => Flight.fromJson(f)).toList();
         }
-        if (json['retour'] != null) {
-          for (var flight in json['retour']) {
-            retour.add(Flight.fromJson(flight));
-          }
-        }
-      } else {
-        for (var flight in json){
-          aller.add(Flight.fromJson(flight));
+        return [Flight.fromJson(item)];
+      }
+
+      if (json is Map && json['aller'] != null) {
+        for (var trip in json['aller']) {
+          aller.add(parseTrip(trip));
         }
       }
-      
-      return {'aller': aller, 'retour': retour};
-    }else {
+      return {'aller': aller, 'retour': []};
+    } else {
       throw Exception('Failed to load flights');
     }
   }
