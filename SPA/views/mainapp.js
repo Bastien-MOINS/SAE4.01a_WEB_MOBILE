@@ -22,6 +22,22 @@ class MainApp {
         this.render();
         // On écoute les événements globaux
         this.bindEvents();
+        this.registerHashChange();
+        this.handleRouteChange();
+    }
+
+    registerHashChange() {
+        window.addEventListener('hashchange', () => {
+            this.handleRouteChange();
+        });
+    }
+
+    handleRouteChange() {
+        const hash = window.location.hash;
+        if (hash === '#/compagnies') this.setState({ nom: "compagnie", action: "GET" });
+        else if (hash === '#/vols' || hash === '' || hash === '#/') this.setState({ nom: "vol", action: "GET" });
+        else if (hash === '#/terminaux') this.setState({ nom: "terminal", action: "GET" });
+        else if (hash === '#/aeroports') this.setState({ nom: "aeroport", action: "GET" });
     }
 
     async loadTasks() {
@@ -69,13 +85,13 @@ class MainApp {
             <div class="flex flex-col h-screen bg-gray-50 font-jersey text-lg">
                 <header class="flex h-16 bg-gray-100 border-b border-black">
                     <div class="flex items-center justify-center w-32 border-r border-black bg-gray-100 text-3xl">
-                        <img src="img/FTLogo2.png" width="60" height=""60"/>
+                        <i class="fa-solid fa-plane"></i>
                     </div>
                     <nav class="flex flex-1">
-                        <button id="btn-compagnies" class="flex-1 text-2xl font-bold uppercase border-r border-black transition-colors ${getNavClass('compagnie')}">Compagnie</button>
-                        <button id="btn-vols" class="flex-1 text-2xl font-bold uppercase border-r border-black transition-colors ${getNavClass('vol')}">Vols</button>
-                        <button id="btn-terminaux" class="flex-1 text-2xl font-bold uppercase border-r border-black transition-colors ${getNavClass('terminal')}">Terminaux</button>
-                        <button id="btn-aeroports" class="flex-1 text-2xl font-bold uppercase transition-colors ${getNavClass('aeroport')}">Aéroports</button>
+                        <a href="#/compagnies" id="btn-compagnies" class="flex-1 flex items-center justify-center text-2xl font-bold uppercase border-r border-black transition-colors ${getNavClass('compagnie')}">Compagnie</a>
+                        <a href="#/vols" id="btn-vols" class="flex-1 flex items-center justify-center text-2xl font-bold uppercase border-r border-black transition-colors ${getNavClass('vol')}">Vols</a>
+                        <a href="#/terminaux" id="btn-terminaux" class="flex-1 flex items-center justify-center text-2xl font-bold uppercase border-r border-black transition-colors ${getNavClass('terminal')}">Terminaux</a>
+                        <a href="#/aeroports" id="btn-aeroports" class="flex-1 flex items-center justify-center text-2xl font-bold uppercase transition-colors ${getNavClass('aeroport')}">Aéroports</a>
                     </nav>
                 </header>
 
@@ -117,20 +133,6 @@ class MainApp {
     // On met un seul écouteur sur le conteneur principal.
     bindEvents() {
         this.container.addEventListener('click', async (e) => {
-            // 1. Bouton du <nav> des tables
-            if (e.target.id === 'btn-compagnies') {
-                this.setState({ nom: "compagnie", action: "GET" });
-            }
-            else if (e.target.id === 'btn-vols') {
-                this.setState({ nom: "vol", action: "GET" });
-            }
-            else if (e.target.id === 'btn-terminaux') {
-                this.setState({ nom: "terminal", action: "GET" });
-            }
-            else if (e.target.id === 'btn-aeroports') {
-                this.setState({ nom: "aeroport", action: "GET" });
-            }
-
             // 2. HTTP Action clicks
             // Nous mettons simplement à jour les classes des actions sans tout réafficher
             // car un affichage complet détruit le conteneur #route dont dépendent les sous-applications.

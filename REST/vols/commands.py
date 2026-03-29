@@ -1,10 +1,14 @@
 from .app import app, db
 from .models import Compagnie, Aeroport, Vol, Terminal
 from datetime import date, timedelta, time
+import os
 
 @app.cli.command()
 def syncdb():
     """Remplir la base de données avec des données de test."""
+
+    os.makedirs(os.path.dirname(app.config["SQLALCHEMY_DATABASE_URI"].replace("sqlite:///file:", "").split("?")[0].replace("sqlite:///", "")), exist_ok=True)
+
     db.drop_all()
     db.create_all()
     
