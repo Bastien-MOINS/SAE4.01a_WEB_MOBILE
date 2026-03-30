@@ -14,7 +14,7 @@ class MainScreen extends StatefulWidget{
 /// Gère l'état et l'index actuel de la [BottomNavigationBar]
 class _MainScreenState extends State<MainScreen>{
   int currentIndex = 0;
-  final List<Widget> screens = [HomeScreen(), SearchScreen(), MapScreen()];
+  final List<Widget> screens = [HomeScreen(), SearchScreen()];
   
   /// Construit le widget principal [MaterialApp]
   /// Configure le thème général de l'application
@@ -54,10 +54,6 @@ class _MainScreenState extends State<MainScreen>{
                   icon: Icon(Icons.search),
                   label: 'Rechercher'
               ),
-              BottomNavigationBarItem(
-                  icon: Icon(Icons.map),
-                  label: 'Carte'
-              )
             ],
             currentIndex: currentIndex,
             onTap: (int index){
