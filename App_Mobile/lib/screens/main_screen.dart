@@ -1,5 +1,4 @@
 import 'package:app_mobile/screens/home_screen.dart';
-import 'package:app_mobile/screens/map_screen.dart';
 import 'package:app_mobile/screens/search_screen.dart';
 import 'package:flutter/material.dart';
 
