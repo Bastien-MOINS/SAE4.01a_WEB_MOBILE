@@ -45,7 +45,7 @@ class _RegisterState extends State<InscrConectScreen> {
                       labelText: 'Pseudo',
                       prefixIcon: Icon(
                         Icons.person,
-                        color: Colors.blue,
+                        color: Colors.blue[900],
                       ),
                       errorStyle: TextStyle(fontSize: 18.0),
                       border: OutlineInputBorder(
@@ -67,7 +67,7 @@ class _RegisterState extends State<InscrConectScreen> {
                       labelText: 'Mot de passe',
                       prefixIcon: Icon(
                         Icons.password,
-                        color: Colors.blue,
+                        color: Colors.blue[900],
                       ),
                       errorStyle: TextStyle(fontSize: 18.0),
                       border: OutlineInputBorder(
@@ -84,7 +84,7 @@ class _RegisterState extends State<InscrConectScreen> {
                       height: 50,
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.blue,
+                          backgroundColor: Colors.blue[900],
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(30),
                           ),
@@ -144,8 +144,8 @@ class _RegisterState extends State<InscrConectScreen> {
                     },
                     child: Text(
                       _pageInscription ? "Déjà un compte ? Se connecter" : "Pas de compte ? S'inscrire",
-                      style: const TextStyle(
-                        color: Colors.blue,
+                      style: TextStyle(
+                        color: Colors.blue[900],
                         fontStyle: FontStyle.italic,
                         decoration: TextDecoration.underline,
                       ),
