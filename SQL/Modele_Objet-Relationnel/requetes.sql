@@ -1,6 +1,7 @@
 -- Requete A
 
-select EQUIPAGE from VOL;
+select numero_vol, count(*) as nbEquipageParFonction, Fonction from VOL, table(Vol.equipage) 
+GROUP BY numero_vol, Fonction;
 
 -- Requete B
 
