@@ -65,4 +65,18 @@ VALUES (905, TO_DATE('2026-06-03', 'YYYY-MM-DD'), TO_TIMESTAMP('21:00:00', 'HH24
         EQUIPAGE(equipageV('William T.', 'Pilote'), equipageV('Kate M.', 'Hotesse')),
         INDICESQUALITE(indQualV('Ponctualite', 9, 0.7), indQualV('Proprete', 9, 0.3)));
 
+INSERT INTO VOL (numero_vol, date_debut, heure_debut, id_compagnie, numero_aeroport_dep, id_terminal_dep, numero_aeroport_arr, id_terminal_arr, equipage, indice_qualite) 
+VALUES (105, TO_DATE('2026-06-05', 'YYYY-MM-DD'), TO_TIMESTAMP('10:00:00', 'HH24:MI:SS'), 1, 101, 2, 102, 1,
+        EQUIPAGE(equipageV('Jean Martin', 'Pilote'), equipageV('Alice L.', 'Copilote')), 
+        INDICESQUALITE(indQualV('Confort', 9, 0.5)));
+
+INSERT INTO VOL (numero_vol, date_debut, heure_debut, id_compagnie, numero_aeroport_dep, id_terminal_dep, numero_aeroport_arr, id_terminal_arr, equipage, indice_qualite) 
+VALUES (260, TO_DATE('2026-06-10', 'YYYY-MM-DD'), TO_TIMESTAMP('15:30:00', 'HH24:MI:SS'), 2, 102, 1, 105, 3,
+        EQUIPAGE(equipageV('Hans Zimmer', 'Pilote')),
+        INDICESQUALITE(indQualV('Prix', 10, 1)));
+
+INSERT INTO VOL (numero_vol, date_debut, heure_debut, id_compagnie, numero_aeroport_dep, id_terminal_dep, numero_aeroport_arr, id_terminal_arr, equipage, indice_qualite) 
+VALUES (110, TO_DATE('2026-06-15', 'YYYY-MM-DD'), TO_TIMESTAMP('09:00:00', 'HH24:MI:SS'), 1, 101, 1, 106, 1,
+        EQUIPAGE(equipageV('Jean Martin', 'Pilote')),
+        NULL);
 COMMIT;
