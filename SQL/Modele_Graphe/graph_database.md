@@ -102,3 +102,10 @@ CREATE (v905:Vol {numero_vol: 905, date_debut: '2026-06-03', heure_debut: '21:00
 CREATE (v905)-[:IDENTIFIER_PAR]->(c4)
 CREATE (v905)-[:PARS {date_debut: '2026-06-03', heure_debut: '21:00:00'}]->(t104_5)
 CREATE (v905)-[:ARRIVE {date_arrivee: '2026-06-04', heure_arrivee: '06:30:00'}]->(t103_arr)
+
+// Question 3.
+
+MATCH chemin = shortestPath((A1:Aeroport)-[:APPARTIENT|PARS|ARRIVE*]-(A2:Aeroport))
+WHERE A1.ville <> A2.ville
+RETURN A1.ville, A2.ville, length(chemin) as longueur
+ORDER BY A1.ville
