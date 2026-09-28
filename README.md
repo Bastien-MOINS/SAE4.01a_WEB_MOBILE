@@ -3,6 +3,25 @@
 ## Nicolas Camera
 # SAE4.01a_WEB_MOBILE
 
+## Introduction
+
+Ce dépôt présente **Flight Track**, un projet universitaire réalisé en groupe de 3 étudiants. L'objectif était de concevoir et développer un système complet de gestion et de réservation de vols aériens. Le projet s'articule autour d'une API backend commune (Flask) et se divise en deux interfaces distinctes pour répondre aux besoins des clients et des administrateurs :
+
+### 📱 Application Mobile (Client)
+Développée en **Flutter**, l'application mobile est destinée aux utilisateurs finaux (les voyageurs). Ses fonctionnalités principales incluent :
+* **Recherche de vols** avec des filtres (dates, escales, villes).
+* **Réservation et annulation** de billets avec gestion du compte utilisateur.
+* **Cartographie interactive** pour visualiser les itinéraires de vol.
+* **Suivi en temps réel** des prochains trajets directement depuis l'accueil.
+
+### 💻 Application Web (Administrateur)
+Développée sous la forme d'une **Single Page Application (SPA)**, cette interface web est réservée à la gestion du réseau aérien. Elle permet aux administrateurs de :
+* **Visualiser** l'ensemble de la base de données (Vols, Compagnies, Aéroports, Terminaux).
+* **Gérer les données** via des opérations CRUD complètes (Ajout/POST, Modification/PUT, Suppression/DELETE).
+* Maintenir l'offre de vols à jour en temps réel pour l'application mobile.
+
+---
+
 ## 1. Architecture du Projet
 
 Afin d'assurer la maintenabilité et la clarté du code, nous avons adopté une structure où chaque composant de la SAE est isolé dans un répertoire dédié :
@@ -109,7 +128,7 @@ flutter run -d chrome
 
 Le frontend (SPA) se situe dans le répertoire `SPA/`. Suivez ces étapes pour l'initialiser :
 
-### démarrer le serveur HTTP
+### Démarrer le serveur HTTP
 
 ```bash
 python -m http.server
